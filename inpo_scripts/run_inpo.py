@@ -229,6 +229,11 @@ def main():
     trainer.save_model(training_args.output_dir)
     logger.info(f"Model saved to {training_args.output_dir}")
 
+    # Add this step to explicitly save the tokenizer.
+    if trainer.accelerator.is_main_process:
+        trainer.tokenizer.save_pretrained(training_args.output_dir)
+        logger.info(f"Tokenizer saved to {training_args.output_dir}")
+
     kwargs = {
         "finetuned_from": model_args.model_name_or_path,
         "dataset": list(data_args.dataset_mixer.keys()),
@@ -243,13 +248,13 @@ def main():
     ##########
     # Evaluate
     ##########
-    if training_args.do_eval:
-        logger.info("*** Evaluate ***")
-        metrics = trainer.evaluate()
-        if "test" in raw_datasets:
-            metrics["eval_samples"] = len(raw_datasets["test"])
-        trainer.log_metrics("eval", metrics)
-        trainer.save_metrics("eval", metrics)
+    # if training_args.do_eval:
+    #     logger.info("*** Evaluate ***")
+    #     metrics = trainer.evaluate()
+    #     if "test" in raw_datasets:
+    #         metrics["eval_samples"] = len(raw_datasets["test"])
+    #     trainer.log_metrics("eval", metrics)
+    #     trainer.save_metrics("eval", metrics)
 
     if training_args.push_to_hub is True:
         logger.info("Pushing to hub...")
