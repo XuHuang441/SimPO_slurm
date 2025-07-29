@@ -23,13 +23,13 @@ history_args=""
 #     --sanity_check True
 
 # train
-#WANDB_MODE=disabled ACCELERATE_LOG_LEVEL=info conda run -n sim accelerate launch \
-#    --config_file accelerate_configs/deepspeed_zero3.yaml \
-#    -m inpo_scripts.run_inpo \
-#    training_configs/gemma-2-9b-it-inpo-iter1.yaml \
+WANDB_MODE=disabled ACCELERATE_LOG_LEVEL=info conda run -n sim accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter1.yaml \
 
-WANDB_MODE=disabled conda run -n sim python -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter1.yaml
+#WANDB_MODE=disabled conda run -n sim python -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-iter1.yaml
 
 
 history_paths+=("./outputs/gemma-2-9b-it_inpo_stage_1/")
