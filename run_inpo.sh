@@ -3,25 +3,24 @@
 source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
 conda activate sim
 export PYTHONPATH=$(pwd)
-export HF_HOME=/hai/scratch/fangwu97/hf_cache
 
 history_paths=()
 
 # divide dataset into 3 subsets with 20000 rows each.
-conda run -n sim python -m inpo_scripts.split_dataset
+#conda run -n sim python -m inpo_scripts.split_dataset
 
 # ------------------------iter1------------------------
 history_args=""
 
  # precompute # --config_file ./accelerate_configs/zero2.yaml
- conda run -n sim accelerate launch --num_processes=1 -m inpo_scripts.precompute \
-     --run_name "inpo_iter1" \
-     --train_dir "princeton-nlp/gemma2-ultrafeedback-armorm" \
-     --output_dir "data/inpo_iter1/pref" \
-     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
-     --loss_type inpo --lr_scheduler_type cosine \
-     $history_args \
-     --sanity_check True
+# conda run -n sim accelerate launch --num_processes=1 -m inpo_scripts.precompute \
+#     --run_name "inpo_iter1" \
+#     --train_dir "princeton-nlp/gemma2-ultrafeedback-armorm" \
+#     --output_dir "data/inpo_iter1/pref" \
+#     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
+#     --loss_type inpo --lr_scheduler_type cosine \
+#     $history_args \
+#     --sanity_check True
 
 # train
 WANDB_MODE=disabled ACCELERATE_LOG_LEVEL=info conda run -n sim accelerate launch \
