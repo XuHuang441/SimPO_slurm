@@ -3,6 +3,7 @@
 source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
 conda activate sim
 export PYTHONPATH=$(pwd)
+export HF_HOME=/hai/scratch/fangwu97/hf_cache
 
 history_paths=()
 
