@@ -9,8 +9,6 @@ source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
 conda activate sim
 export PYTHONPATH=$(pwd)
 
-nvidia-smi
-
 history_paths=()
 
 # divide dataset into 3 subsets with 20000 rows each.
@@ -30,10 +28,10 @@ history_args=""
 #     --sanity_check True
 
 # train
-#WANDB_MODE=disabled ACCELERATE_LOG_LEVEL=info conda run -n sim accelerate launch \
-#    --config_file accelerate_configs/deepspeed_zero3.yaml \
-#    -m inpo_scripts.run_inpo \
-#    training_configs/gemma-2-9b-it-inpo-iter1.yaml \
+WANDB_MODE=disabled ACCELERATE_LOG_LEVEL=info conda run -n sim accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter1.yaml \
 
 #WANDB_MODE=disabled conda run -n sim python -m inpo_scripts.run_inpo \
 #    training_configs/gemma-2-9b-it-inpo-iter1.yaml
