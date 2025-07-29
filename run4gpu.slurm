@@ -18,7 +18,7 @@ conda run -n sim python -m inpo_scripts.split_dataset
 history_args=""
 
  # precompute # --config_file ./accelerate_configs/zero2.yaml
- conda run -n sim accelerate launch --num_processes=4 -m inpo_scripts.precompute \
+ conda run -n sim accelerate launch --num_processes=1 -m inpo_scripts.precompute \
      --run_name "inpo_iter1" \
      --train_dir "princeton-nlp/gemma2-ultrafeedback-armorm" \
      --output_dir "data/inpo_iter1/pref" \
@@ -44,7 +44,7 @@ echo "Starting iteration 2"
  for SEED in 13 21 42 79 100
  do
      echo "Running decode with seed $SEED..."
-     CUDA_VISIBLE_DEVICES=0,1,2,3 conda run -n inpo python -m on_policy_data_gen.decode \
+     conda run -n inpo python -m on_policy_data_gen.decode \
      --data_dir "data/gemma2_ufb_part2.jsonl" \
      --seed "$SEED" \
      --sanity_check True \
@@ -66,7 +66,7 @@ history_args=""
 if [ ${#history_paths[@]} -gt 0 ]; then
     history_args="--history_paths ${history_paths[@]}"
 fi
-conda run -n sim accelerate launch --num_processes=4 -m inpo_scripts.precompute \
+conda run -n sim accelerate launch --num_processes=1 -m inpo_scripts.precompute \
     --run_name "inpo_iter2" \
     --train_dir "datasets/gemma2_ultrafeedback/inpo_iter2" \
     --output_dir "data/inpo_iter2/pref" \
