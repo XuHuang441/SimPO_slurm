@@ -124,17 +124,6 @@ class INPOTrainer(SimPOTrainer):
 
         loss = losses.mean()
 
-        # (Optional) You can still include the SFT loss component from SimPO if you want
-        # if self.sft_weight > 0.0:
-        #     # This logic is copied from SimPOTrainer's get_batch_loss_metrics
-        #     if not self.is_encoder_decoder:
-        #         policy_chosen_logits = policy_chosen_logits[..., :-1, :].contiguous()
-        #         chosen_labels = chosen_labels[..., 1:].clone()
-        #     loss_func = nn.CrossEntropyLoss()
-        #     sft_loss = loss_func(policy_chosen_logits.view(-1, policy_chosen_logits.shape[-1]), chosen_labels.view(-1))
-        #     loss = self.sft_weight * sft_loss + loss
-        #     metrics[f"{prefix}sft_loss"] = sft_loss.detach().cpu()
-
         # 4. Calculate metrics (same as your original implementation)
         reward_accuracies = (chosen_rewards > rejected_rewards).float()
 
