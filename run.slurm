@@ -25,6 +25,7 @@ history_args=""
      --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
      --loss_type inpo --lr_scheduler_type cosine \
      $history_args \
+     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"\
      --sanity_check True
 
 # train

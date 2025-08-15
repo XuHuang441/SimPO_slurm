@@ -114,6 +114,7 @@ class ScriptArguments:
     len_penalty: Optional[float] = field(default=0, metadata={"help": "the length penalty"})
     history_paths: Optional[List[str]] = field(default_factory=list)
     max_history_t: Optional[int] = field(default=2, metadata={"help": "the maximum history length"})
+    cache_dir: Optional[str] = field(default=None, metadata={"help": "Cache directory for models and datasets"})
 
 
 # same function from simpo trainer
@@ -259,7 +260,12 @@ def compute_and_add_logps(
 ) -> DatasetDict:
     logger.info(f"--- Processing model: {model_path} for columns with prefix: '{column_prefix}' ---")
 
-    model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16, use_cache=False).eval()
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        torch_dtype=torch.bfloat16,
+        use_cache=False,
+        cache_dir=args.cache_dir
+    ).eval()
     model = accelerator.prepare_model(model)
 
     # 核心改动：使用 DPODataCollatorWithPadding
@@ -385,7 +391,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     accelerator = Accelerator()
 
-    tokenizer = AutoTokenizer.from_pretrained(script_args.model_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(script_args.model_name_or_path, cache_dir=script_args.cache_dir)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
