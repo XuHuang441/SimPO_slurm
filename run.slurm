@@ -55,7 +55,7 @@ for SEED in 13 21 42 79 100
      --model "Timia123/simpo_inpo_iter1_aug13" \
      --seed "$SEED" \
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
-     --batch_size 8192 \
+     --batch_size 96 \
      --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
      --num_gpu 4 # Tensor Parallelism
   done
