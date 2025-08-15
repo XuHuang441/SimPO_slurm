@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p hai
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 
@@ -18,7 +18,7 @@ history_paths=()
 history_args=""
 
 #  precompute # --config_file ./accelerate_configs/zero2.yaml
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=1 -m inpo_scripts.precompute_simpo_style \
+/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=2 -m inpo_scripts.precompute_simpo_style \
      --run_name "inpo_iter1" \
      --train_dir "/home/hubing/SimPO/data/gemma2_ufb_part1.jsonl" \
      --output_dir "data/inpo_iter1/pref" \
