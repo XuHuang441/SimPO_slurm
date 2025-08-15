@@ -39,7 +39,7 @@ history_args=""
 #history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_1/")
 history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 
-echo "Completed iteration 1"
+#echo "Completed iteration 1"
 
 # ------------------------iter2------------------------
 echo "Starting iteration 2"
