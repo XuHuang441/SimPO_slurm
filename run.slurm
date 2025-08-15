@@ -5,6 +5,8 @@
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 
+set -e
+
 source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
 conda activate sim
 export PYTHONPATH=$(pwd)
