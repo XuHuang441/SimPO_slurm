@@ -32,7 +32,12 @@ args = parser.parse_args()
 print(args)
 
 data_dir = args.data_dir
-llm = LLM(model=args.model, tensor_parallel_size=args.num_gpu, download_dir=args.cache_dir)
+llm = LLM(
+    model=args.model,
+    tensor_parallel_size=args.num_gpu,
+    download_dir=args.cache_dir,
+    gpu_memory_utilization=0.9,  # 允许 VLLM 使用 90% 的 GPU 显存
+)
 tokenizer = llm.get_tokenizer()
 
 if os.path.exists(data_dir):
