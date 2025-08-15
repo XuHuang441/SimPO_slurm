@@ -12,7 +12,7 @@ export PYTHONPATH=$(pwd)
 history_paths=()
 
 # divide dataset into 3 subsets with 20000 rows each.
-#conda run -n sim python -m inpo_scripts.split_dataset
+conda run -n sim python -m inpo_scripts.split_dataset
 
 # ------------------------iter1------------------------
 history_args=""
