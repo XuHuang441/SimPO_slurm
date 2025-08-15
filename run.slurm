@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 
@@ -18,17 +18,17 @@ history_paths=()
 history_args=""
 
 #  precompute # --config_file ./accelerate_configs/zero2.yaml
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=2 -m inpo_scripts.precompute_simpo_style \
-     --run_name "inpo_iter1" \
-     --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1.jsonl" \
-     --output_dir "data/inpo_iter1/pref" \
-     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
-     --loss_type inpo --lr_scheduler_type cosine \
-     $history_args \
-     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-     --sanity_check True
-
-# train
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+#     --run_name "inpo_iter1" \
+#     --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1.jsonl" \
+#     --output_dir "data/inpo_iter1/pref" \
+#     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
+#     --loss_type inpo --lr_scheduler_type cosine \
+#     $history_args \
+#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+#     --sanity_check False
+#
+## train
 #echo "iter1: start training"
 #
 #ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
@@ -37,26 +37,30 @@ history_args=""
 #    training_configs/gemma-2-9b-it-inpo-iter1.yaml \
 
 #history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_1/")
+history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 
-#echo "Completed iteration 1"
+echo "Completed iteration 1"
 
 # ------------------------iter2------------------------
-#echo "Starting iteration 2"
-#
-## on policy data gen
-#echo "iter2: Starting on policy data gen"
-#
-#for SEED in 13 21 42 79 100
-#  do
-#     echo "Running decode with seed $SEED..."
-#     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
-#     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
-#     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_1" \
-#     --seed "$SEED" \
-#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
-#     --batch_size 8192 \
-#     --num_gpu 8 # Tensor Parallelism
-#  done
+echo "Starting iteration 2"
+
+# on policy data gen
+echo "iter2: Starting on policy data gen"
+
+for SEED in 13 21 42 79 100
+  do
+     echo "Running decode with seed $SEED..."
+     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
+     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
+     --model "Timia123/simpo_inpo_iter1_aug13" \
+     --seed "$SEED" \
+     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
+     --batch_size 8192 \
+     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+     --sanity_check \
+     --num_gpu 4 # Tensor Parallelism
+     break
+  done
 #
 #/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2"

@@ -4,6 +4,8 @@ import os
 os.environ["VLLM_ATTENTION_BACKEND"] = "FLASHINFER" # this is recommended for gemma-2 models; otherwise it is not needed
 import argparse
 import json
+from tqdm import tqdm
+from more_itertools import chunked
 
 parser = argparse.ArgumentParser(description='Decode with vllm')
 parser.add_argument('--data_dir', type=str, default="HuggingFaceH4/ultrafeedback_binarized",
@@ -22,12 +24,15 @@ parser.add_argument('--output_dir', type=str, default="datasets/gemma2_ultrafeed
                     help='output_dir')
 parser.add_argument('--num_gpu', type=int, default=4)
 parser.add_argument('--sanity_check', type=bool, default=False)
+parser.add_argument('--batch_size', type=int, default=8)
+parser.add_argument('--cache_dir', type=str, default=None,
+                    help='Cache directory for model and dataset')
 args = parser.parse_args()
 
 print(args)
 
 data_dir = args.data_dir
-llm = LLM(model=args.model, tensor_parallel_size=args.num_gpu)
+llm = LLM(model=args.model, tensor_parallel_size=args.num_gpu, download_dir=args.cache_dir)
 tokenizer = llm.get_tokenizer()
 
 if os.path.exists(data_dir):
@@ -53,18 +58,20 @@ sampling_params = SamplingParams(temperature=args.temperature,
                                  top_p=args.top_p, 
                                  max_tokens=args.max_tokens, 
                                  seed=args.seed,)
-outputs = llm.generate(conversations, sampling_params)
-
-# Save the outputs as a JSON file.
+batched_prompts = list(chunked(conversations, args.batch_size))
 output_data = []
-for i, output in enumerate(outputs):
-    prompt = output.prompt
-    generated_text = output.outputs[0].text
-    output_data.append({
-        'prompt': prompts[i],
-        "format_prompt": prompt,
-        'generated_text': generated_text,
-    })
+
+for batch_prompts in tqdm(batched_prompts):
+    try:
+        outputs = llm.generate(batch_prompts, sampling_params)
+        for i, output in enumerate(outputs):
+            output_data.append({
+                'prompt': batch_prompts[i],
+                "format_prompt": output.prompt,
+                'generated_text': output.outputs[0].text,
+            })
+    except Exception as e:
+        print(f"Batch failed with error: {e}")
 
 output_file = f'output_{args.seed}.json'
 if not os.path.exists(args.output_dir):
