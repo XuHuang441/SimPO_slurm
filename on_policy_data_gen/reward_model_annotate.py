@@ -12,6 +12,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--generation_file", type=str, default="datasets/gemma2_ultrafeedback/all_outputs.json", help="Path to the output generation file")
 parser.add_argument("--reward_model", type=str, default="RLHFlow/ArmoRM-Llama3-8B-v0.1", help="Path to reward model")
 parser.add_argument("--output_dir", type=str, default="datasets/gemma2_ultrafeedback/", help="Path to output directory")
+parser.add_argument('--cache_dir', type=str, default=None,
+                    help='Cache directory for model and dataset')
 args = parser.parse_args()
 
 print(args)
@@ -25,8 +27,11 @@ candidates_texts = [data["all_generated_responses"] for data in output_data]
 
 model = AutoModelForSequenceClassification.from_pretrained(args.reward_model, 
                                                            device_map="cuda", 
-                                                           trust_remote_code=True, torch_dtype=torch.bfloat16)
-tokenizer = AutoTokenizer.from_pretrained(args.reward_model, use_fast=True)
+                                                           trust_remote_code=True,
+                                                           torch_dtype=torch.bfloat16,
+                                                            cache_dir=args.cache_dir
+                                                           )
+tokenizer = AutoTokenizer.from_pretrained(args.reward_model, use_fast=True, cache_dir=args.cache_dir)
 
 for data in tqdm.tqdm(output_data):
     prompt = data["prompt"]
