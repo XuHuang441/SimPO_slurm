@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p hai
-#SBATCH --gres=gpu:4
-#SBATCH --job-name=my4gpujob
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=mpo
 #SBATCH --output=output.log
 
 source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
@@ -12,7 +12,7 @@ export PYTHONPATH=$(pwd)
 history_paths=()
 
 # divide dataset into 3 subsets with 20000 rows each.
-conda run -n sim python -m inpo_scripts.split_dataset
+#conda run -n sim python -m inpo_scripts.split_dataset
 
 # ------------------------iter1------------------------
 history_args=""
