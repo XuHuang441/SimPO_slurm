@@ -20,7 +20,7 @@ history_args=""
 #  precompute # --config_file ./accelerate_configs/zero2.yaml
 /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=2 -m inpo_scripts.precompute_simpo_style \
      --run_name "inpo_iter1" \
-     --train_dir "/home/hubing/SimPO/data/gemma2_ufb_part1.jsonl" \
+     --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1.jsonl" \
      --output_dir "data/inpo_iter1/pref" \
      --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
      --loss_type inpo --lr_scheduler_type cosine \
