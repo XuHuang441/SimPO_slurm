@@ -47,28 +47,28 @@ history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 echo "Starting iteration 2"
 
 # on policy data gen
-echo "iter2: Starting on policy data gen"
-
-for SEED in 13 21 42 79 100
-  do
-     echo "Running decode with seed $SEED..."
-     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
-     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
-     --model "Timia123/simpo_inpo_iter1_aug13" \
-     --seed "$SEED" \
-     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
-     --batch_size 96 \
-     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-     --num_gpu 2 # Tensor Parallelism
-  done
-
-#/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
-#     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2"
+#echo "iter2: Starting on policy data gen"
 #
-#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
-#     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json" \
+#for SEED in 13 21 42 79 100
+#  do
+#     echo "Running decode with seed $SEED..."
+#     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
+#     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
+#     --model "Timia123/simpo_inpo_iter1_aug13" \
+#     --seed "$SEED" \
 #     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
-#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
+#     --batch_size 96 \
+#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+#     --num_gpu 2 # Tensor Parallelism
+#  done
+
+/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
+     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2"
+
+/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
+     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json" \
+     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
+     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
 
 ## precompute
 #echo "iter2: start precompute"

@@ -31,7 +31,7 @@ conda activate inpo
 pip install \
 pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
   vllm==0.9.0 \
-#  transformers==4.53.1 \
+  pip install "transformers<4.54.0"
   datasets==4.0.0 \
   https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.0.post2/flash_attn-2.8.0.post2+cu12torch2.7cxx11abiFALSE-cp310-cp310-linux_x86_64.whl  
   numpy==1.26.4 \
