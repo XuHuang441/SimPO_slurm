@@ -7,18 +7,16 @@ conda create -n sim python=3.10 -y
 conda activate sim
 pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
 pip install \
-  https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.0.post2/flash_attn-2.8.0.post2+cu12torch2.7cxx11abiFALSE-cp310-cp310-linux_x86_64.whl  numpy==1.26.4 \
+  https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.0.post2/flash_attn-2.8.0.post2+cu12torch2.7cxx11abiFALSE-cp310-cp310-linux_x86_64.whl  
+  numpy==1.26.4 \
   accelerate==0.29.2 \
-  deepspeed==0.12.2 \
+  deepspeed==0.16.8 \
   transformers==4.44.2 \
   trl==0.9.6 \
-  huggingface-hub==0.23.2 \
   datasets==2.18.0 \
+  huggingface-hub==0.23.2 \
   peft==0.7.1 \
   wandb \
-  # for A100?
-  safetensors==0.5.3
-  huggingface-hub==0.24.7
 
 
 ```
