@@ -72,6 +72,7 @@ if empty_strs:
         # 4. Extract and fill in the newly generated response
         if outputs:
             generated_text = outputs[0].outputs[0].text
+            print(f"  - Generated text: {generated_text}")
             data[i]["all_generated_responses"][j] = generated_text
             print(f"  - Successfully regenerated and filled.")
         else:
