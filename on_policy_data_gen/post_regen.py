@@ -3,6 +3,7 @@ from datasets import load_dataset
 import argparse
 import os
 from vllm import LLM, SamplingParams
+import time # Import time for a small delay
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--generation_file_dir", type=str, help="Diretory containing the generation files", default="datasets/gemma2_ultrafeedback")
@@ -47,6 +48,7 @@ if empty_strs:
     )
     tokenizer = llm.get_tokenizer()
     for i, j in empty_strs:
+        original_seed = seeds[j]
         print(f"Sample {i}'s all_generated_responses[{j}] is empty. Regenerating with seed {seeds[j]}...")
 
         sampling_params = SamplingParams(temperature=args.temperature,
@@ -66,23 +68,42 @@ if empty_strs:
         ]
         formatted_prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
-        # 3. Regenerate the response
-        outputs = llm.generate(formatted_prompt, sampling_params, use_tqdm=False)
+        generated_text = ""
 
-        # 4. Extract and fill in the newly generated response
-        if outputs:
-            generated_text = outputs[0].outputs[0].text
-            print(f"  - Generated text: {generated_text}")
+        # --- Start of updated retry logic ---
+        MAX_RETRIES = 5
+        current_seed = original_seed
+
+        for attempt in range(MAX_RETRIES):
+            sampling_params = SamplingParams(
+                temperature=0.7,
+                top_p=0.95,
+                max_tokens=2048,
+                seed=current_seed
+            )
+
+            outputs = llm.generate(formatted_prompt, sampling_params, use_tqdm=False)
+
+            if outputs and outputs[0].outputs[0].text.strip() != "":
+                generated_text = outputs[0].outputs[0].text
+                print(f"  - Successfully regenerated with seed {current_seed} on attempt {attempt + 1}.")
+                break  # Exit the retry loop on success
+            else:
+                print(
+                    f"  - Attempt {attempt + 1} with seed {current_seed} still produced an empty string. Retrying with a new seed...")
+                current_seed += 1  # Increment the seed for the next attempt
+                time.sleep(1)  # Small delay to avoid overwhelming any systems
+
+        if generated_text.strip() != "":
             data[i]["all_generated_responses"][j] = generated_text
-            print(f"  - Successfully regenerated and filled.")
         else:
-            print(f"  - WARNING: Regeneration failed for sample {i}, response {j}.")
+            print(f"  - FAILED: Could not generate a non-empty response for sample {i} after {MAX_RETRIES} attempts.")
 
-        # --- Save the corrected data back to the file ---
-        print("Regeneration complete. Saving the updated data...")
-        with open(args.generation_file_dir, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
-        print("File saved.")
+    # --- Save the corrected data back to the file ---
+    print("Regeneration complete. Saving the updated data...")
+    with open(args.generation_file_dir, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+    print("File saved.")
 
 else:
     print("No empty strings found.")
