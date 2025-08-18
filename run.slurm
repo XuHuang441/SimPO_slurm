@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:6
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 #SBATCH --mem=128G
@@ -94,21 +94,21 @@ echo "Starting iteration 2"
 #    --sanity_check False
 
 # train
-echo "iter2: start training"
-
-while true; do free -h >> memory_usage.log; sleep 5; done &
-MONITOR_PID=$!
-
-ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-    --config_file accelerate_configs/deepspeed_zero3.yaml \
-    -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
-
-kill $MONITOR_PID
-
-history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/")
-
-echo "Completed iteration 2"
+#echo "iter2: start training"
+#
+#while true; do free -h >> memory_usage.log; sleep 5; done &
+#MONITOR_PID=$!
+#
+#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+#    --config_file accelerate_configs/deepspeed_zero3.yaml \
+#    -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
+#
+#kill $MONITOR_PID
+#
+#history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/")
+#
+#echo "Completed iteration 2"
 #
 # #------------------------iter3------------------------
 ## on policy data gen
