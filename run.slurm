@@ -67,7 +67,7 @@ echo "Starting iteration 2"
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2"
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_regen \
-     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
+     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json" \
      --model "Timia123/simpo_inpo_iter1_aug13" \
      --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
      --num_gpu 2 # Tensor Parallelism
