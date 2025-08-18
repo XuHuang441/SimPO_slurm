@@ -94,6 +94,25 @@ if empty_strs:
                 current_seed += 1  # Increment the seed for the next attempt
                 time.sleep(1)  # Small delay to avoid overwhelming any systems
 
+        if generated_text.strip() == "":
+            print(
+                f"  - WARNING: All {MAX_RETRIES} seeded attempts failed. Trying final fallback with high temperature...")
+
+            fallback_params = SamplingParams(
+                temperature=1.2,  # Higher temperature for more randomness
+                top_p=0.95,
+                max_tokens=4096,
+                seed=None  # No seed for true randomness
+            )
+
+            outputs = llm.generate(formatted_prompt, fallback_params, use_tqdm=False)
+
+            if outputs and outputs[0].outputs[0].text.strip() != "":
+                generated_text = outputs[0].outputs[0].text
+                print("  - SUCCESS: Fallback method generated a non-empty response.")
+            else:
+                print(f"  - FAILED: Even the high-temperature fallback failed for sample {i}.")
+
         if generated_text.strip() != "":
             data[i]["all_generated_responses"][j] = generated_text
         else:
