@@ -73,7 +73,7 @@ echo "Starting iteration 2"
 #     --num_gpu 2 # Tensor Parallelism
 
 /hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
-     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json" \
+     --generation_file "datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json" \
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
      --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
 
@@ -128,7 +128,7 @@ echo "Starting iteration 2"
 #
 #/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
-#
+# dont forget to check empty strings
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
 #     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3/all_outputs.json" \
 #     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
