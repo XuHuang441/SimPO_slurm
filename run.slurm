@@ -45,7 +45,7 @@ history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 #echo "Completed iteration 1"
 
 # ------------------------iter2------------------------
-echo "Starting iteration 2"
+#echo "Starting iteration 2"
 
 # on policy data gen
 #echo "iter2: Starting on policy data gen"
