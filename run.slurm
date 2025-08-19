@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 #SBATCH --mem=128G
@@ -124,7 +124,7 @@ for SEED in 13 21 42 79 100
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3" \
      --batch_size 96 \
      --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-     --num_gpu 4 # Tensor Parallelism
+     --num_gpu 2 # Tensor Parallelism
   done
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
