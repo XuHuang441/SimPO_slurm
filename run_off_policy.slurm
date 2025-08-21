@@ -1,0 +1,109 @@
+#!/bin/bash
+#SBATCH --account=yejin
+#SBATCH -p yejin
+#SBATCH --gres=gpu:4
+#SBATCH --job-name=mpo
+#SBATCH --output=output.log
+#SBATCH --mem=128G
+
+set -e
+
+source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
+conda activate sim
+export PYTHONPATH=$(pwd)
+
+history_paths=()
+
+# divide dataset into 3 subsets with 20000 rows each.
+#conda run -n sim python -m inpo_scripts.split_dataset
+
+# ------------------------iter1------------------------
+history_args=""
+
+#  precompute # --config_file ./accelerate_configs/zero2.yaml
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+#     --run_name "inpo_iter1" \
+#     --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1.jsonl" \
+#     --output_dir "data/inpo_iter1/pref" \
+#     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
+#     --loss_type inpo --lr_scheduler_type cosine \
+#     $history_args \
+#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+#     --sanity_check False
+#
+## train
+#echo "iter1: start training"
+#
+#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+#    --config_file accelerate_configs/deepspeed_zero3.yaml \
+#    -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-iter1.yaml \
+
+#history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_1/")
+history_paths+=("Timia123/simpo_inpo_iter1_aug13")
+
+#echo "Completed iteration 1"
+
+# ------------------------iter2------------------------
+echo "Starting iteration 2"
+
+# precompute
+echo "iter2: start precompute"
+history_args=""
+if [ ${#history_paths[@]} -gt 0 ]; then
+    history_args="--history_paths ${history_paths[@]}"
+fi
+/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+    --run_name "inpo_iter2" \
+    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
+    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter2/pref" \
+    --ref_model google/gemma-2-9b-it \
+    --loss_type inpo --lr_scheduler_type cosine \
+    $history_args \
+    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+    --sanity_check False
+
+# train
+echo "iter2: start training"
+
+while true; do free -h >> memory_usage.log; sleep 5; done &
+MONITOR_PID=$!
+
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
+
+kill $MONITOR_PID
+
+history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/")
+
+echo "Completed iteration 2"
+
+# #------------------------iter3------------------------
+# precompute
+echo "iter3: start precompute"
+history_args=""
+if [ ${#history_paths[@]} -gt 0 ]; then
+    history_args="--history_paths ${history_paths[@]}"
+fi
+/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+    --run_name "inpo_iter3" \
+    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3.jsonl" \
+    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter3/pref" \
+    --ref_model google/gemma-2-9b-it \
+    --loss_type inpo --lr_scheduler_type cosine \
+    $history_args \
+    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+    --sanity_check False
+
+# train
+echo "iter3: start training"
+ACCELERATE_LOG_LEVEL=info  /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter3.yaml \
+
+history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_3/")
+
+echo "Completed iteration 3"
