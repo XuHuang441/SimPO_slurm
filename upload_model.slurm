@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p yejin
+#SBATCH -p hai-lo
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=upload_model
 #SBATCH --output=output_upload.log
