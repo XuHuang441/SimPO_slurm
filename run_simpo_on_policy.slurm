@@ -13,7 +13,7 @@ conda activate sim
 export PYTHONPATH=$(pwd)
 
 # divide dataset into 3 subsets with 20000 rows each.
-conda run -n inpo python -m inpo_scripts.split_dataset
+conda run -n sim python -m inpo_scripts.split_dataset
 
 # ------------------------iter1------------------------
 echo "iter1: start training"
