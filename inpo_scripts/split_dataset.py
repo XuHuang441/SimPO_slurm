@@ -28,9 +28,9 @@ print("Saving splits to disk...")
 # dataset_part2.to_json("../data/gemma2_ufb_part2.jsonl")
 # dataset_part3.to_json("../data/gemma2_ufb_part3.jsonl")
 
-dataset_part1.save_to_disk("../data/gemma2_ufb_part1")
-dataset_part2.save_to_disk("../data/gemma2_ufb_part2")
-dataset_part3.save_to_disk("../data/gemma2_ufb_part3")
+dataset_part1.save_to_disk("/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1")
+dataset_part2.save_to_disk("/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2")
+dataset_part3.save_to_disk("/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3")
 
 print("Done!")
 
