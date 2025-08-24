@@ -83,7 +83,7 @@ curl -s -H "Title: ▶️ Job Started" -d "Slurm Job $SLURM_JOB_ID ($SLURM_JOB_N
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
 
 /hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
-     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/06d7bb04447afe850230b3f1cc3af28658d3a277/all_outputs.json" \
+     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/4dbda9026c77c26c8d6d83873f79ab112f4e7e78/all_outputs.json" \
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
 notify "iter2: reward_model_annotate" $?
 echo "iter2: start training"
