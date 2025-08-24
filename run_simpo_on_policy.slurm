@@ -12,6 +12,43 @@ source /hai/scratch/fangwu97/miniconda3/etc/profile.d/conda.sh
 conda activate sim
 export PYTHONPATH=$(pwd)
 
+NTFY_TOPIC="https://ntfy.sh/xu-hai-update"
+
+function notify() {
+    STEP_NAME="$1"
+    EXIT_CODE="$2"
+
+    if [ "$EXIT_CODE" -eq 0 ]; then
+        # 成功
+        TITLE="✅ Success: $STEP_NAME"
+        MESSAGE="Step '$STEP_NAME' completed successfully on job $SLURM_JOB_ID."
+        PRIORITY="default"
+        TAGS="white_check_mark"
+    else
+        # 失败
+        TITLE="❌ Failure: $STEP_NAME"
+        MESSAGE="Step '$STEP_NAME' failed with exit code $EXIT_CODE on job $SLURM_JOB_ID. Please check the logs."
+        PRIORITY="high"
+        TAGS="x"
+    fi
+
+    # 发送通知
+    curl -s \
+      -H "Title: $TITLE" \
+      -H "Priority: $PRIORITY" \
+      -H "Tags: $TAGS" \
+      -d "$MESSAGE" \
+      "$NTFY_TOPIC"
+
+    # 如果脚本失败，则立即退出整个任务
+    if [ "$EXIT_CODE" -ne 0 ]; then
+        echo "Exiting due to failure in step: $STEP_NAME"
+        exit "$EXIT_CODE"
+    fi
+}
+
+curl -s -H "Title: ▶️ Job Started" -d "Slurm Job $SLURM_JOB_ID ($SLURM_JOB_NAME) has started." "$NTFY_TOPIC"
+
 # divide dataset into 3 subsets with 20000 rows each.
 #conda run -n sim python -m inpo_scripts.split_dataset
 
@@ -48,14 +85,14 @@ export PYTHONPATH=$(pwd)
 /hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
      --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/06d7bb04447afe850230b3f1cc3af28658d3a277/all_outputs.json" \
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
-
+notify "iter2: reward_model_annotate" $?
 echo "iter2: start training"
 
 ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
 --config_file accelerate_configs/deepspeed_zero3.yaml \
 scripts/run_simpo.py \
 training_configs/gemma-2-9b-it-simpo_iter2_on_policy.yaml
-
+notify "iter2: Training" $?
 echo "Completed iteration 2"
 
 # ------------------------iter3------------------------
@@ -77,8 +114,12 @@ for SEED in 13 21 42 79 100
      --num_gpu 8 # Tensor Parallelism
   done
 
+notify "iter3: All decode seeds completed" $?
+
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
      --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3"
+notify "iter3: Post-processing" $?
+
 
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
 #     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3/all_outputs.json" \
@@ -92,3 +133,4 @@ for SEED in 13 21 42 79 100
 #training_configs/gemma-2-9b-it-simpo_iter3_on_policy.yaml
 #
 #echo "Completed iteration 3"
+curl -s -H "Title: 🎉 Job Finished" -d "Slurm Job $SLURM_JOB_ID ($SLURM_JOB_NAME) has finished successfully." "$NTFY_TOPIC"
