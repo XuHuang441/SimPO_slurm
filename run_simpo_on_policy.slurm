@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:8
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 #SBATCH --mem=128G
@@ -16,70 +16,70 @@ export PYTHONPATH=$(pwd)
 #conda run -n sim python -m inpo_scripts.split_dataset
 
 # ------------------------iter1------------------------
-echo "iter1: start training"
-
-ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
---config_file accelerate_configs/deepspeed_zero3.yaml \
-scripts/run_simpo.py \
-training_configs/gemma-2-9b-it-simpo_iter1_on_policy.yaml
-
-# ------------------------iter2------------------------
-echo "Starting iteration 2"
-
-# on policy data gen, make sure to check if there's empty outputs
-echo "iter2: Starting on policy data gen"
-
-for SEED in 13 21 42 79 100
-  do
-     echo "Running decode with seed $SEED..."
-     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
-     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
-     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it-simpo-iter1_on_policy" \
-     --seed "$SEED" \
-     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2" \
-     --batch_size 96 \
-     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-     --num_gpu 4 # Tensor Parallelism
-  done
-
-/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
-     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
-
-#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
-#     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2/all_outputs.json" \
-#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
-#
-#echo "iter2: start training"
+#echo "iter1: start training"
 #
 #ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
 #--config_file accelerate_configs/deepspeed_zero3.yaml \
 #scripts/run_simpo.py \
-#training_configs/gemma-2-9b-it-simpo_iter2_on_policy.yaml
+#training_configs/gemma-2-9b-it-simpo_iter1_on_policy.yaml
 #
-#echo "Completed iteration 2"
-#
-## ------------------------iter3------------------------
-#echo "Starting iteration 3"
+## ------------------------iter2------------------------
+#echo "Starting iteration 2"
 #
 ## on policy data gen, make sure to check if there's empty outputs
-#echo "iter3: Starting on policy data gen"
+#echo "iter2: Starting on policy data gen"
 #
 #for SEED in 13 21 42 79 100
 #  do
 #     echo "Running decode with seed $SEED..."
 #     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
-#     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3.jsonl" \
-#     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it-simpo-iter2_on_policy" \
+#     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part2.jsonl" \
+#     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it-simpo-iter1_on_policy" \
 #     --seed "$SEED" \
-#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3" \
+#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2" \
 #     --batch_size 96 \
 #     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-#     --num_gpu 8 # Tensor Parallelism
+#     --num_gpu 4 # Tensor Parallelism
 #  done
 #
 #/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
-#     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3"
-#
+#     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
+
+/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
+     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/06d7bb04447afe850230b3f1cc3af28658d3a277/all_outputs.json" \
+     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter2"
+
+echo "iter2: start training"
+
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+--config_file accelerate_configs/deepspeed_zero3.yaml \
+scripts/run_simpo.py \
+training_configs/gemma-2-9b-it-simpo_iter2_on_policy.yaml
+
+echo "Completed iteration 2"
+
+# ------------------------iter3------------------------
+echo "Starting iteration 3"
+
+# on policy data gen, make sure to check if there's empty outputs
+echo "iter3: Starting on policy data gen"
+
+for SEED in 13 21 42 79 100
+  do
+     echo "Running decode with seed $SEED..."
+     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
+     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3.jsonl" \
+     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it-simpo-iter2_on_policy" \
+     --seed "$SEED" \
+     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3" \
+     --batch_size 96 \
+     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+     --num_gpu 8 # Tensor Parallelism
+  done
+
+/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
+     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3"
+
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
 #     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3/all_outputs.json" \
 #     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/simpo_iter3"
