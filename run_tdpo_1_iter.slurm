@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p hai-lo
-#SBATCH --gres=gpu:8
+#SBATCH -p yejin
+#SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
 #SBATCH --output=output_tdpo_1_iter.log
 #SBATCH --mem=128G
