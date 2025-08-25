@@ -3,7 +3,7 @@
 #SBATCH -p hai-lo
 #SBATCH --gres=gpu:8
 #SBATCH --job-name=mpo
-#SBATCH --output=output.log
+#SBATCH --output=output_tdpo_1_iter.log
 #SBATCH --mem=128G
 
 set -e
@@ -54,16 +54,16 @@ curl -s -H "Title: ▶️ Job Started" -d "Slurm Job $SLURM_JOB_ID ($SLURM_JOB_N
 history_args=""
 
 #  precompute
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=$num_gpu -m inpo_scripts.precompute_simpo_style \
-     --run_name "inpo_iter1" \
-     --train_dir "princeton-nlp/gemma2-ultrafeedback-armorm" \
-     --output_dir "data/inpo_1_iter/pref" \
-     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
-     --loss_type inpo --lr_scheduler_type cosine \
-     $history_args \
-     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-     --sanity_check False
-notify "precompute_simpo_style" $?
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=$num_gpu -m inpo_scripts.precompute_simpo_style \
+#     --run_name "inpo_iter1" \
+#     --train_dir "princeton-nlp/gemma2-ultrafeedback-armorm" \
+#     --output_dir "data/inpo_1_iter/pref" \
+#     --ref_model google/gemma-2-9b-it --last_model google/gemma-2-9b-it \
+#     --loss_type inpo --lr_scheduler_type cosine \
+#     $history_args \
+#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+#     --sanity_check False
+#notify "precompute_simpo_style" $?
 
 # train
 echo "start training"
