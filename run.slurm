@@ -46,7 +46,7 @@ history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 
 # ------------------------iter2------------------------
 #echo "Starting iteration 2"
-
+#
 # on policy data gen
 #echo "iter2: Starting on policy data gen"
 #
@@ -62,15 +62,9 @@ history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 #     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
 #     --num_gpu 2 # Tensor Parallelism
 #  done
-
+#
 #/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2"
-
-#/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_regen \
-#     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json" \
-#     --model "Timia123/simpo_inpo_iter1_aug13" \
-#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-#     --num_gpu 2 # Tensor Parallelism
 
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
 #     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/616f4bc181dead2cf5cf6bc4bf27e7f48bf067c8/all_outputs.json" \
@@ -94,21 +88,21 @@ history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 #    --sanity_check False
 
 # train
-#echo "iter2: start training"
-#
-#while true; do free -h >> memory_usage.log; sleep 5; done &
-#MONITOR_PID=$!
-#
-#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-#    --config_file accelerate_configs/deepspeed_zero3.yaml \
-#    -m inpo_scripts.run_inpo \
-#    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
-#
-#kill $MONITOR_PID
-#
+echo "iter2: start training"
+
+while true; do free -h >> memory_usage.log; sleep 5; done &
+MONITOR_PID=$!
+
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
+
+kill $MONITOR_PID
+
 history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/")
-#
-#echo "Completed iteration 2"
+
+echo "Completed iteration 2"
 
 # #------------------------iter3------------------------
 # on policy data gen
@@ -151,12 +145,12 @@ history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo
 #    --sanity_check False
 
 # train
-echo "iter3: start training"
-ACCELERATE_LOG_LEVEL=info  /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-    --config_file accelerate_configs/deepspeed_zero3.yaml \
-    -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter3.yaml \
-
-history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_3/")
-
-echo "Completed iteration 3"
+#echo "iter3: start training"
+#ACCELERATE_LOG_LEVEL=info  /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+#    --config_file accelerate_configs/deepspeed_zero3.yaml \
+#    -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-iter3.yaml \
+#
+#history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_3/")
+#
+#echo "Completed iteration 3"
