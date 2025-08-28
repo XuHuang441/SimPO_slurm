@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:8
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 #SBATCH --mem=128G
@@ -87,42 +87,42 @@ history_paths+=("Timia123/simpo_inpo_iter1_aug13")
 #    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
 #    --sanity_check False
 
-# train
-echo "iter2: start training"
-
-while true; do free -h >> memory_usage.log; sleep 5; done &
-MONITOR_PID=$!
-
-ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-    --config_file accelerate_configs/deepspeed_zero3.yaml \
-    -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
-
-kill $MONITOR_PID
-
+## train
+#echo "iter2: start training"
+#
+#while true; do free -h >> memory_usage.log; sleep 5; done &
+#MONITOR_PID=$!
+#
+#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+#    --config_file accelerate_configs/deepspeed_zero3.yaml \
+#    -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-iter2.yaml \
+#
+#kill $MONITOR_PID
+#
 history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/")
 
-echo "Completed iteration 2"
+#echo "Completed iteration 2"
 
 # #------------------------iter3------------------------
 # on policy data gen
-#echo "iter3: Starting on policy data gen"
-#
-#for SEED in 13 21 42 79 100
-#  do
-#     echo "Running decode with seed $SEED..."
-#     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
-#     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3.jsonl" \
-#     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/" \
-#     --seed "$SEED" \
-#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3" \
-#     --batch_size 96 \
-#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-#     --num_gpu 2 # Tensor Parallelism
-#  done
-#
-#/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
-#     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
+echo "iter3: Starting on policy data gen"
+
+for SEED in 13 21 42 79 100
+  do
+     echo "Running decode with seed $SEED..."
+     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
+     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3.jsonl" \
+     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/" \
+     --seed "$SEED" \
+     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3" \
+     --batch_size 96 \
+     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+     --num_gpu 8 # Tensor Parallelism
+  done
+
+/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
+     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
 # dont forget to check empty strings
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
 #     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/f9a9aff36a836bde56d43fd77e100b24931b7d09/all_outputs_iter3.json" \
