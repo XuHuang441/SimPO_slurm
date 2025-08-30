@@ -162,33 +162,33 @@ history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo
 #/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
 # dont forget to check empty strings
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
-     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/fc8024b5e4353e5f74954d4133d20813267e77b8/all_outputs.json" \
-     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
+#     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/fc8024b5e4353e5f74954d4133d20813267e77b8/all_outputs.json" \
+#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
+#
+## precompute
+#echo "iter3: start precompute"
+#history_args=""
+#if [ ${#history_paths[@]} -gt 0 ]; then
+#    history_args="--history_paths ${history_paths[@]}"
+#fi
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+#    --run_name "inpo_iter3" \
+#    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3" \
+#    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter3/pref" \
+#    --ref_model google/gemma-2-9b-it \
+#    --loss_type inpo --lr_scheduler_type cosine \
+#    $history_args \
+#    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+#    --sanity_check False
 
-# precompute
-echo "iter3: start precompute"
-history_args=""
-if [ ${#history_paths[@]} -gt 0 ]; then
-    history_args="--history_paths ${history_paths[@]}"
-fi
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
-    --run_name "inpo_iter3" \
-    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3" \
-    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter3/pref" \
-    --ref_model google/gemma-2-9b-it \
-    --loss_type inpo --lr_scheduler_type cosine \
-    $history_args \
-    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-    --sanity_check False
-
- train
+# train
 echo "iter3: start training"
 ACCELERATE_LOG_LEVEL=info  /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
     --config_file accelerate_configs/deepspeed_zero3.yaml \
     -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter3.yaml \
-
+    training_configs/gemma-2-9b-it-inpo-iter3.yaml
+notify "iter3: training complete" $?
 history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_3/")
 
 echo "Completed iteration 3"
