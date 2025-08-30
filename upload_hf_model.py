@@ -3,7 +3,7 @@ import os
 
 api = HfApi(token=os.getenv("HF_TOKEN"))
 api.upload_folder(
-    folder_path="/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_1_iter/",
-    repo_id="XuHuang/gemma-2-9b-it_DPO",
+    folder_path="/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_3/",
+    repo_id="XuHuang/inpo_iter3_aug30",
     repo_type="model",
 )
