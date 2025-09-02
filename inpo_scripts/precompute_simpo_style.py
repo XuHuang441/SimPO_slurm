@@ -391,7 +391,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     accelerator = Accelerator()
 
-    tokenizer = AutoTokenizer.from_pretrained(script_args.model_name_or_path, cache_dir=script_args.cache_dir)
+    tokenizer = AutoTokenizer.from_pretrained(script_args.ref_model, cache_dir=script_args.cache_dir)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
