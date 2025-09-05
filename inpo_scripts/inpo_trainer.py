@@ -42,8 +42,9 @@ class INPOTrainer(SimPOTrainer):
         t = self.max_history_t
         weighted_logratios = 0.0
         #  weighting strategy, can be made more flexible if needed
-        self.ratio = 1/6
-        weights = [24/25, 1/25] # t-1, t-2 ....
+        # self.ratio = 1/6
+        # weights = [24/25, 1/25] # t-1, t-2 ....
+        weights = [1.0, 0.0] # t-1, t-2 ....
 
         if history_logps_list and t > 0:
             effective_t = len(history_logps_list)
@@ -54,8 +55,7 @@ class INPOTrainer(SimPOTrainer):
                         lambda_j = weights[j] / total_weight if total_weight > 0 else 1 / effective_t
                         weighted_logratios += lambda_j * (chosen_j - rejected_j)
 
-        # logits = pi_logratios - self.ratio * ref_logratios - (1 - self.ratio) * weighted_logratios
-        logits = pi_logratios - self.ratio * ref_logratios
+        logits = pi_logratios - self.ratio * ref_logratios - (1 - self.ratio) * weighted_logratios
 
         # INPO uses a squared error loss
         losses = (logits - 1 / (2 * self.eta)) ** 2

@@ -102,25 +102,20 @@ history_paths+=("XuHuang/gemma-2-9b-it-inpo-iter1-bs128-lr5e-7")
 #    --sanity_check False
 #
 #notify "iter2: precompute complete" $?
-#
-## train
-#echo "iter2: start training"
-#
-#while true; do free -h >> memory_usage.log; sleep 5; done &
-#MONITOR_PID=$!
-#
-#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-#    --config_file accelerate_configs/deepspeed_zero3.yaml \
-#    -m inpo_scripts.run_inpo \
-#    training_configs/gemma-2-9b-it-inpo-iter2.yaml
-#
-#notify "iter2: train complete" $?
-#
-#kill $MONITOR_PID
+
+# train
+echo "iter2: start training"
+
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter2.yaml
+
+notify "iter2: train complete" $?
 
 history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_off_policy_tdpo_stage_2_bs128_lr5e-7/")
 #
-#echo "Completed iteration 2"
+echo "Completed iteration 2"
 
 
 # #------------------------iter3------------------------
