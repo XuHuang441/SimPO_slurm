@@ -1,3 +1,4 @@
+#!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p hai-lo
 #SBATCH --gres=gpu:4
