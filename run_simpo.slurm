@@ -43,7 +43,7 @@ function notify() {
 
 curl -s -H "Title: ▶️ Job Started" -d "Slurm Job $SLURM_JOB_ID ($SLURM_JOB_NAME) has started." "$NTFY_TOPIC"
 
-ACCELERATE_LOG_LEVEL=info /home/ubuntu/anaconda3/envs/sim/bin/accelerate launch \
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
 --config_file accelerate_configs/deepspeed_zero3.yaml \
 scripts/run_simpo.py \
 training_configs/gemma-2-9b-it-simpo.yaml
