@@ -1,4 +1,3 @@
-
 import logging
 import random
 import sys
@@ -26,13 +25,11 @@ from alignment import (
 from alignment.data import maybe_insert_system_message, is_openai_format
 from peft import PeftConfig, PeftModel
 
-
-
 # =====================================================================================
 # NEW: Import INPO classes
 # =====================================================================================
 from inpo_scripts.inpo_trainer import INPOTrainer  # Assume you saved your INPOTrainer in this file
-from inpo_scripts.inpo_config import INPOConfig     # Assume you saved your INPOConfig in this file
+from inpo_scripts.inpo_config import INPOConfig  # Assume you saved your INPOConfig in this file
 # =====================================================================================
 from datasets import load_from_disk
 
@@ -45,10 +42,10 @@ MISTRAL_CHAT_TEMPLATE = "{% if messages[0]['role'] == 'system' %}{% set loop_mes
 # NEW: Utility function for logps calculation (adapted from TRL's DPOTrainer)
 # =====================================================================================
 def get_batch_logps(
-    logits: torch.FloatTensor,
-    labels: torch.LongTensor,
-    average_log_prob: bool = True,
-    label_pad_token_id: int = -100,
+        logits: torch.FloatTensor,
+        labels: torch.LongTensor,
+        average_log_prob: bool = True,
+        label_pad_token_id: int = -100,
 ) -> torch.FloatTensor:
     """Compute the log probabilities of the given labels under the given logits."""
     if logits.shape[:-1] != labels.shape:
@@ -65,21 +62,23 @@ def get_batch_logps(
         return (per_token_logps * loss_mask).sum(-1) / loss_mask.sum(-1)
     else:
         return (per_token_logps * loss_mask).sum(-1)
+
+
 # =====================================================================================
 
 
 def apply_chat_template(
-    example,
-    tokenizer,
-    task: str,
-    auto_insert_empty_system_msg: bool = True,
-    change_template=None,
+        example,
+        tokenizer,
+        task: str,
+        auto_insert_empty_system_msg: bool = True,
+        change_template=None,
 ):
     # This function remains largely the same, but we will call it for "inpo" task
     if change_template == "mistral":
         tokenizer.chat_template = MISTRAL_CHAT_TEMPLATE
 
-    if task == "inpo": # We can reuse the same logic as simpo/dpo
+    if task == "inpo":  # We can reuse the same logic as simpo/dpo
         if all(k in example.keys() for k in ("chosen", "rejected")):
             if not is_openai_format(example["chosen"]) or not is_openai_format(example["rejected"]):
                 raise ValueError(f"Require OpenAI format for all messages")
@@ -162,6 +161,25 @@ def main():
     if not isinstance(raw_datasets, DatasetDict):
         raw_datasets = DatasetDict({"train": raw_datasets})
 
+    train_dataset = None
+    eval_dataset = None
+    for split_name in raw_datasets.keys():
+        if "train" in split_name:
+            train_dataset = raw_datasets[split_name]
+        elif "test" in split_name or "eval" in split_name:
+            eval_dataset = raw_datasets[split_name]
+
+    if train_dataset is None:
+        raise ValueError(
+            f"No training split found in the dataset. Available splits: {list(raw_datasets.keys())}"
+        )
+
+    logger.info(f"Using '{next(k for k, v in raw_datasets.items() if v is train_dataset)}' for training.")
+    if eval_dataset:
+        logger.info(f"Using '{next(k for k, v in raw_datasets.items() if v is eval_dataset)}' for evaluation.")
+    else:
+        logger.info("No evaluation split found or selected.")
+
     logger.info(f"Loaded dataset splits: {list(raw_datasets.keys())}")
     #####################################
     # Load tokenizer
@@ -169,12 +187,11 @@ def main():
     data_args.truncation_side = "left"
     tokenizer = get_tokenizer(model_args, data_args)
 
-
     column_names = list(raw_datasets["train"].features)
 
-    for index in random.sample(range(len(raw_datasets["train"])), 3):
-        logger.info(f"Prompt sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['prompt']}")
-        logger.info(f"Logps sample {index}: {raw_datasets['train'][index]['reference_chosen_logps']}")
+    # for index in random.sample(range(len(raw_datasets["train"])), 3):
+    #     logger.info(f"Prompt sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['prompt']}")
+    #     logger.info(f"Logps sample {index}: {raw_datasets['train'][index]['reference_chosen_logps']}")
 
     torch_dtype = (
         model_args.torch_dtype if model_args.torch_dtype in ["auto", None] else getattr(torch, model_args.torch_dtype)
@@ -200,8 +217,8 @@ def main():
     trainer = INPOTrainer(
         model=model,
         args=training_args,
-        train_dataset=raw_datasets["train"],
-        eval_dataset=raw_datasets.get("test"),
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         peft_config=get_peft_config(model_args),
     )
@@ -240,7 +257,7 @@ def main():
         "finetuned_from": model_args.model_name_or_path,
         "dataset": list(data_args.dataset_mixer.keys()),
         "dataset_tags": list(data_args.dataset_mixer.keys()),
-        "tags": ["alignment-handbook", "inpo"], # MODIFIED
+        "tags": ["alignment-handbook", "inpo"],  # MODIFIED
     }
     if trainer.accelerator.is_main_process:
         trainer.create_model_card(**kwargs)
