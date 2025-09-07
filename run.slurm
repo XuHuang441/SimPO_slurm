@@ -136,6 +136,7 @@ fi
     $history_args \
     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
     --sanity_check False
+
 # train
 #echo "iter2: start training"
 #
