@@ -138,7 +138,7 @@ ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelera
 notify "iter2: train complete" $?
 
 #
-history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/")
+history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2_bs_128_lr_5e-7_eval15/")
 
 echo "Completed iteration 2"
 
