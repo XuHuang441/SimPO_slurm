@@ -132,7 +132,7 @@ fi
     --loss_type inpo --lr_scheduler_type cosine \
     $history_args \
     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-    --sanity_check True
+    --sanity_check False
 
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
 #    --run_name "inpo_iter2" \
