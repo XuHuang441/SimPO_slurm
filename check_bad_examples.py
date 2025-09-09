@@ -6,7 +6,10 @@ from datasets import load_from_disk
 
 dataset = load_from_disk("/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter2/pref_skywork")
 
-print(dataset.features)
+for split_name, split_dataset in dataset.items():
+    print(f"=== {split_name} ===")
+    print(split_dataset.features)
+
 
 # ref_wrong = 0
 # ref_total = 0
