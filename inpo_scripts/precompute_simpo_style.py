@@ -296,10 +296,10 @@ def compute_and_add_logps(
         # 将 logps 添加回原始的、未被 tokenize 的数据集中
         split_dataset = dataset[split]
         # 第一步：在 split_dataset 上添加 chosen_logps
-        split_dataset = split_dataset.add_column(f"{column_prefix}_chosen_logps", torch.cat(all_chosen_logps).numpy())
+        split_dataset = split_dataset.add_column(f"{column_prefix}_chosen_logps", torch.cat(all_chosen_logps).float().numpy())
         # 第二步：在上一步返回的新 dataset 上继续添加 rejected_logps
         split_dataset = split_dataset.add_column(f"{column_prefix}_rejected_logps",
-                                                 torch.cat(all_rejected_logps).numpy())
+                                                 torch.cat(all_rejected_logps).float().numpy())
         # 最后，将包含了两个新列的最终结果赋回去
         dataset[split] = split_dataset
 
