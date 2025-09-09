@@ -38,7 +38,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
     attn_implementation="flash_attention_2",  # Recommended for performance
     num_labels=1,  # Standard for reward models
 )
-tokenizer = AutoTokenizer.from_pretrained(args.reward_model, cache_dir=args.cache_dir)
+tokenizer = AutoTokenizer.from_pretrained(args.reward_model, use_fast=False, cache_dir=args.cache_dir)
 
 for data in tqdm.tqdm(output_data):
     prompt = data["prompt"]
