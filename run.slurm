@@ -111,28 +111,28 @@ history_paths+=("XuHuang/gemma-2-9b-it-inpo-iter1-bs128-lr5e-7")
 #     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
 #     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
 
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate_skywork \
-     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/616f4bc181dead2cf5cf6bc4bf27e7f48bf067c8/all_outputs.json" \
-     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_skywork" \
-     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
-
-notify "iter2: reward_model_annotate_skywork complete" $?
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate_skywork \
+#     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/616f4bc181dead2cf5cf6bc4bf27e7f48bf067c8/all_outputs.json" \
+#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_skywork" \
+#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
+#
+#notify "iter2: reward_model_annotate_skywork complete" $?
 
 # precompute
-#echo "iter2: start precompute"
-#history_args=""
-#if [ ${#history_paths[@]} -gt 0 ]; then
-#    history_args="--history_paths ${history_paths[@]}"
-#fi
-#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
-#    --run_name "inpo_iter2" \
-#    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2" \
-#    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter2/pref" \
-#    --ref_model google/gemma-2-9b-it \
-#    --loss_type inpo --lr_scheduler_type cosine \
-#    $history_args \
-#    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-#    --sanity_check False
+echo "iter2: start precompute"
+history_args=""
+if [ ${#history_paths[@]} -gt 0 ]; then
+    history_args="--history_paths ${history_paths[@]}"
+fi
+/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+    --run_name "inpo_iter2" \
+    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_skywork/all_outputs_bin_dataset" \
+    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter2/pref_skywork" \
+    --ref_model google/gemma-2-9b-it \
+    --loss_type inpo --lr_scheduler_type cosine \
+    $history_args \
+    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+    --sanity_check False
 
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
 #    --run_name "inpo_iter2" \
