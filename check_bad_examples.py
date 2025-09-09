@@ -4,7 +4,7 @@ from datasets import load_dataset
 
 from datasets import load_from_disk
 
-dataset = load_from_disk("hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter1/pref/train")
+dataset = load_from_disk("/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter1/pref/train")
 
 ref_wrong = 0
 ref_total = 0
