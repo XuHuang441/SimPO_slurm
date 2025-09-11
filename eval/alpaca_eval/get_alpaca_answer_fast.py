@@ -32,6 +32,7 @@ class ScriptArguments:
     eos_ids: List[int] = field(default_factory=lambda: [], metadata={"help": "End-of-sequence token IDs."})
     # ✨ NEW: Argument for number of GPUs
     tensor_parallel_size: Optional[int] = field(default=4, metadata={"help": "Number of GPUs to use."})
+    cache_dir: Optional[str] = field(default="~/.cache/inpo", metadata={"help": "Directory to cache models and datasets."})
 
 
 # ===================== main function =====================
@@ -58,6 +59,7 @@ if __name__ == "__main__":
         max_model_len=script_args.max_new_tokens,
         load_format="auto",
         seed=script_args.seed,
+        download_dir=script_args.cache_dir
     )
 
     # load evaluation dataset
