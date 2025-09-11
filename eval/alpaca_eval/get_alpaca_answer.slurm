@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p hai-lo
-#SBATCH --gres=gpu:4
+#SBATCH -p yejin
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=mpo_eval
 #SBATCH --output=output_eval.log
 #SBATCH --mem=128G
