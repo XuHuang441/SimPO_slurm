@@ -33,9 +33,11 @@ from inpo_scripts.inpo_config import INPOConfig  # Assume you saved your INPOCon
 # =====================================================================================
 from datasets import load_from_disk
 
-import numpy as np
-import torch.serialization as ts
-ts.add_safe_globals([np.core.multiarray._reconstruct, np.ndarray, np.dtype])
+_orig_load = torch.load
+def _compat_load(*args, **kwargs):
+    kwargs.setdefault("weights_only", False)
+    return _orig_load(*args, **kwargs)
+torch.load = _compat_load
 
 
 logger = logging.getLogger(__name__)
