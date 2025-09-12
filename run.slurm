@@ -4,8 +4,7 @@
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
-#SBATCH --mem=1024G
-#SBATCH --nodelist=haic-hgx-7
+#SBATCH --mem=128G
 
 set -e
 
@@ -84,14 +83,14 @@ history_args=""
 #   --sanity_check False
 
 # train
-echo "iter1: start training"
-
-ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-    --config_file accelerate_configs/deepspeed_zero3.yaml \
-    -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter1.yaml
-
-notify "iter1: train complete" $?
+#echo "iter1: start training"
+#
+#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+#    --config_file accelerate_configs/deepspeed_zero3.yaml \
+#    -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-iter1.yaml
+#
+#notify "iter1: train complete" $?
 
 #history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_1/")
 history_paths+=("XuHuang/gemma-2-9b-it-inpo-iter1-bs128-lr5e-7")
@@ -159,19 +158,19 @@ history_paths+=("XuHuang/gemma-2-9b-it-inpo-iter1-bs128-lr5e-7")
 #    --sanity_check False
 
 # train
-#echo "iter2: start training"
+echo "iter2: start training"
+
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-iter2.yaml
+
+notify "iter2: train complete" $?
+
 #
-#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-#    --config_file accelerate_configs/deepspeed_zero3.yaml \
-#    -m inpo_scripts.run_inpo \
-#    training_configs/gemma-2-9b-it-inpo-iter2.yaml
-#
-#notify "iter2: train complete" $?
-#
-##
-#history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2_bs_128_lr_5e-7_eval15/")
-#
-#echo "Completed iteration 2"
+history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2_bs_128_lr_5e-7_eval15/")
+
+echo "Completed iteration 2"
 
 # #------------------------iter3------------------------
 # on policy data gen

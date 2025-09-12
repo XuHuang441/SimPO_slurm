@@ -55,7 +55,7 @@ class INPOTrainer(SimPOTrainer):
                         lambda_j = weights[j] / total_weight if total_weight > 0 else 1 / effective_t
                         weighted_logratios += lambda_j * (chosen_j - rejected_j)
 
-        logits = pi_logratios - self.ratio * ref_logratios - (1 - self.ratio) * weighted_logratios
+        # logits = pi_logratios - self.ratio * ref_logratios - (1 - self.ratio) * weighted_logratios
 
         logits = pi_logratios - ref_logratios
 
