@@ -4,7 +4,7 @@
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
-#SBATCH --mem=128G
+#SBATCH --mem=256G
 
 set -e
 
