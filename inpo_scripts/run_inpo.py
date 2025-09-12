@@ -33,6 +33,11 @@ from inpo_scripts.inpo_config import INPOConfig  # Assume you saved your INPOCon
 # =====================================================================================
 from datasets import load_from_disk
 
+import numpy as np
+import torch.serialization as ts
+ts.add_safe_globals([np.core.multiarray._reconstruct, np.ndarray, np.dtype])
+
+
 logger = logging.getLogger(__name__)
 
 MISTRAL_CHAT_TEMPLATE = "{% if messages[0]['role'] == 'system' %}{% set loop_messages = messages[1:] %}{% set system_message = messages[0]['content'].strip() + '\n\n' %}{% else %}{% set loop_messages = messages %}{% set system_message = '' %}{% endif %}{% for message in loop_messages %}{% if loop.index0 == 0 %}{% set content = system_message + message['content'] %}{% else %}{% set content = message['content'] %}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + content.strip() + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ ' '  + content.strip() + ' ' + eos_token }}{% endif %}{% endfor %}"
