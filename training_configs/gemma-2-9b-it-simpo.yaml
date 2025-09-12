@@ -18,7 +18,7 @@ beta: 10
 gamma_beta_ratio: 0.5
 do_eval: true
 evaluation_strategy: steps
-eval_steps: 50
+eval_steps: 15
 gradient_accumulation_steps: 16
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
@@ -38,11 +38,11 @@ per_device_train_batch_size: 2
 per_device_eval_batch_size: 2
 push_to_hub: false
 save_strategy: "steps"
-save_steps: 50
+save_steps: 15
 load_best_model_at_end: True
 metric_for_best_model: "eval_loss"
 report_to:
 - wandb
-save_total_limit: 20
+save_total_limit: 2
 seed: 42
 warmup_ratio: 0.1

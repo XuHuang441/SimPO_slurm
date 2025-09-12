@@ -57,6 +57,8 @@ class INPOTrainer(SimPOTrainer):
 
         logits = pi_logratios - self.ratio * ref_logratios - (1 - self.ratio) * weighted_logratios
 
+        logits = pi_logratios - ref_logratios
+
         # INPO uses a squared error loss
         losses = (logits - 1 / (2 * self.eta)) ** 2
 
