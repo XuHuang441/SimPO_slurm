@@ -231,12 +231,6 @@ def main():
     )
     # =====================================================================================
 
-    trainer.model.config.use_cache = False
-    try:
-        trainer.model.generation_config.use_cache = False
-    except Exception:
-        pass
-
     ###############
     # Training loop
     ###############
