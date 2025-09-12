@@ -3,7 +3,7 @@
 #SBATCH -p hai-lo
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
-#SBATCH --output=output.log
+#SBATCH --output=output_simpo.log
 #SBATCH --mem=128G
 
 NTFY_TOPIC="https://ntfy.sh/xu-hai-update"
