@@ -5,6 +5,7 @@
 #SBATCH --job-name=mpo
 #SBATCH --output=output.log
 #SBATCH --mem=1024G
+#SBATCH --nodelist=haic-hgx-7
 
 set -e
 
