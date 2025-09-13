@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p hai-lo
-#SBATCH --gres=gpu:4
+#SBATCH -p yejin
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=mpo_eval
 #SBATCH --output=output_eval.log
 #SBATCH --mem=128G
@@ -15,7 +15,7 @@ model_path="/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it-simpo-bs1
     --model_path $model_path \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs" \
-    --tensor_parallel_size 4
+    --tensor_parallel_size 2
 
 
 
