@@ -3,7 +3,7 @@
 #SBATCH -p hai-lo
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
-#SBATCH --output=output.log
+#SBATCH --output=output_sppo.log
 #SBATCH --mem=128G
 
 set -e
