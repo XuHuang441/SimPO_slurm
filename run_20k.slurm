@@ -3,7 +3,7 @@
 #SBATCH -p yejin
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
-#SBATCH --output=output.log
+#SBATCH --output=output_20k.log
 #SBATCH --mem=128G
 
 set -e
