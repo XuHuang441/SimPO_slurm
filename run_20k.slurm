@@ -74,7 +74,7 @@ echo "iter1: start training"
 ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
     --config_file accelerate_configs/deepspeed_zero3.yaml \
     -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-iter1.yaml
+    training_configs/gemma-2-9b-it-inpo-20k-iter1.yaml
 
 notify "iter1: train complete" $?
 
