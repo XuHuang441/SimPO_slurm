@@ -2,7 +2,7 @@
 #SBATCH --account=yejin
 #SBATCH -p yejin
 #SBATCH --gres=gpu:4
-#SBATCH --job-name=mpo
+#SBATCH --job-name=sppo
 #SBATCH --output=output_sppo.log
 #SBATCH --mem=128G
 
