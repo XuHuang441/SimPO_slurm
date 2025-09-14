@@ -78,7 +78,7 @@ history_args=""
 #
 #notify "iter1: train complete" $?
 
-history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_1/")
+history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_1/checkpoint-50")
 
 #echo "Completed iteration 1"
 
@@ -93,7 +93,7 @@ for SEED in 13 21 42 79 100
      echo "Running decode with seed $SEED..."
      stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
      --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split2.jsonl" \
-     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_1/" \
+     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_1/checkpoint-50" \
      --seed "$SEED" \
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k" \
      --batch_size 96 \
