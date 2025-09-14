@@ -29,6 +29,7 @@ lr_scheduler_type: "cosine" # <-- 新增: 学习率调度器类型, 'cosine' 或
 evaluation_strategy: "steps"
 eval_steps: 15
 save_strategy: "steps"
+save_steps: 15
 save_total_limit: 1           # 只保留 1 个 checkpoint
 load_best_model_at_end: true  # 训练结束时加载最优模型
 metric_for_best_model: "eval_loss"
