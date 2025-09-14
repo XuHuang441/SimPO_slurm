@@ -10,6 +10,7 @@ class INPOConfig(SimPOConfig):
     ratio: float = 1/3
     # The eta parameter for the INPO loss.
     eta: float = 0.0075
+    beta: float = 0.001
     # The maximum number of historical models to consider.
     max_history_t: int = 2
     # The loss type for INPO, we'll use a specific name.
