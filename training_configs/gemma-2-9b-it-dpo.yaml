@@ -23,7 +23,7 @@ bf16: true # Use bfloat16 precision
 seed: 42  # <-- 新增: 用于保证实验的可复现性
 warmup_ratio: 0.1 # <-- 新增: 3% 的训练步数用于学习率预热
 lr_scheduler_type: "cosine" # <-- 新增: 学习率调度器类型, 'cosine' 或 'linear' 都是很好的选择
-
+logging_steps: 2
 
 # ----------------- Evaluation and Saving -----------------
 evaluation_strategy: "steps"

@@ -100,6 +100,9 @@ def main():
         seed=config["seed"],
         warmup_ratio=config["warmup_ratio"],
         lr_scheduler_type=config["lr_scheduler_type"],
+        save_total_limit=config.get("save_total_limit"),
+        load_best_model_at_end=config.get("load_best_model_at_end", False),
+        metric_for_best_model=config.get("metric_for_best_model", "eval_loss"),
     )
 
     # 7. Initialize and start DPOTrainer
