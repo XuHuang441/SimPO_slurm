@@ -160,23 +160,23 @@ echo "Completed iteration 2"
 
 # #------------------------iter3------------------------
 # on policy data gen
-#echo "iter3: Starting on policy data gen"
-#
-#for SEED in 13 21 42 79 100
-#  do
-#     echo "Running decode with seed $SEED..."
-#     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
-#     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part3.jsonl" \
-#     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2/" \
-#     --seed "$SEED" \
-#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3" \
-#     --batch_size 96 \
-#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-#     --num_gpu 8 # Tensor Parallelism
-#  done
-#
-#/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
-#     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3"
+echo "iter3: Starting on policy data gen"
+
+for SEED in 13 21 42 79 100
+  do
+     echo "Running decode with seed $SEED..."
+     stdbuf -oL -eL /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -u -m on_policy_data_gen.decode \
+     --data_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split3.jsonl" \
+     --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_2/" \
+     --seed "$SEED" \
+     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3_20k" \
+     --batch_size 96 \
+     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+     --num_gpu 4 # Tensor Parallelism
+  done
+
+/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
+     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3_20k"
 # dont forget to check empty strings
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
 #     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/fc8024b5e4353e5f74954d4133d20813267e77b8/all_outputs.json" \
