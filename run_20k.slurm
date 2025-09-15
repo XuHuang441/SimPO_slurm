@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p yejin
-#SBATCH --gres=gpu:4
+#SBATCH -p hai-lo
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=mpo
 #SBATCH --output=output_20k.log
 #SBATCH --mem=128G
@@ -144,19 +144,19 @@ echo "Starting iteration 2"
 #    --sanity_check False
 
 # train
-echo "iter2: start training"
-
-ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-    --config_file accelerate_configs/deepspeed_zero3.yaml \
-    -m inpo_scripts.run_inpo \
-    training_configs/gemma-2-9b-it-inpo-20k-iter2.yaml
-
-notify "iter2: train complete" $?
+#echo "iter2: start training"
+#
+#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+#    --config_file accelerate_configs/deepspeed_zero3.yaml \
+#    -m inpo_scripts.run_inpo \
+#    training_configs/gemma-2-9b-it-inpo-20k-iter2.yaml
+#
+#notify "iter2: train complete" $?
 
 #
 history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_2/")
 
-echo "Completed iteration 2"
+#echo "Completed iteration 2"
 
 # #------------------------iter3------------------------
 # on policy data gen
@@ -170,9 +170,9 @@ for SEED in 13 21 42 79 100
      --model "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_2/" \
      --seed "$SEED" \
      --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter3_20k" \
-     --batch_size 96 \
+     --batch_size 48 \
      --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-     --num_gpu 4 # Tensor Parallelism
+     --num_gpu 2 # Tensor Parallelism
   done
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
