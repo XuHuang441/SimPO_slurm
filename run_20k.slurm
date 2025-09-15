@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p hai-lo
+#SBATCH -p yejin
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=mpo
 #SBATCH --output=output_20k.log
@@ -104,10 +104,10 @@ echo "Starting iteration 2"
 #/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python -m on_policy_data_gen.post_process \
 #     --generation_file_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k"
 
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
-     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k/all_outputs.json" \
-     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k" \
-     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate \
+#     --generation_file "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k/all_outputs.json" \
+#     --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k" \
+#     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache"
 
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -m on_policy_data_gen.reward_model_annotate_skywork \
 #     --generation_file "/afs/.ir/users/f/a/fangwu97/.cache/huggingface/hub/models--XuHuang--inpo_iter1/snapshots/616f4bc181dead2cf5cf6bc4bf27e7f48bf067c8/all_outputs.json" \
@@ -117,21 +117,21 @@ echo "Starting iteration 2"
 #notify "iter2: reward_model_annotate_skywork complete" $?
 
 # precompute
-echo "iter2: start precompute"
-history_args=""
-if [ ${#history_paths[@]} -gt 0 ]; then
-    history_args="--history_paths ${history_paths[@]}"
-fi
-/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
-    --run_name "inpo_iter2" \
-    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k" \
-    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter2_20k/pref" \
-    --ref_model google/gemma-2-9b-it \
-    --model_name_or_path /hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_1/checkpoint-50 \
-    --loss_type inpo --lr_scheduler_type cosine \
-    $history_args \
-    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
-    --sanity_check False
+#echo "iter2: start precompute"
+#history_args=""
+#if [ ${#history_paths[@]} -gt 0 ]; then
+#    history_args="--history_paths ${history_paths[@]}"
+#fi
+#/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
+#    --run_name "inpo_iter2" \
+#    --train_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2_20k" \
+#    --output_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/data/inpo_iter2_20k/pref" \
+#    --ref_model google/gemma-2-9b-it \
+#    --model_name_or_path /hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_1/checkpoint-50 \
+#    --loss_type inpo --lr_scheduler_type cosine \
+#    $history_args \
+#    --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/cache" \
+#    --sanity_check False
 
 #/hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch --num_processes=4 -m inpo_scripts.precompute_simpo_style \
 #    --run_name "inpo_iter2" \
@@ -144,19 +144,19 @@ fi
 #    --sanity_check False
 
 # train
-#echo "iter2: start training"
+echo "iter2: start training"
+
+ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
+    --config_file accelerate_configs/deepspeed_zero3.yaml \
+    -m inpo_scripts.run_inpo \
+    training_configs/gemma-2-9b-it-inpo-20k-iter2.yaml
+
+notify "iter2: train complete" $?
+
 #
-#ACCELERATE_LOG_LEVEL=info /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
-#    --config_file accelerate_configs/deepspeed_zero3.yaml \
-#    -m inpo_scripts.run_inpo \
-#    training_configs/gemma-2-9b-it-inpo-20k-iter2.yaml
-#
-#notify "iter2: train complete" $?
-#
-##
-#history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_stage_2_bs_128_lr_5e-7_eval15/")
-#
-#echo "Completed iteration 2"
+history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_2/")
+
+echo "Completed iteration 2"
 
 # #------------------------iter3------------------------
 # on policy data gen
