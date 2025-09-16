@@ -7,7 +7,7 @@ from typing import Dict, Optional
 
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, TrainingArguments
-from trl import DPOTrainer
+from trl import DPOConfig, DPOTrainer
 
 
 # Note: We are no longer using HfArgumentParser for command-line parsing.
@@ -78,45 +78,24 @@ def main():
                                     remove_columns=eval_dataset.column_names)
 
     # 6. Configure Training Arguments
-    # ---------------------------------
-    training_args = TrainingArguments(
-        # Pass all relevant arguments from the config dictionary
-        output_dir=config["output_dir"],
-        per_device_train_batch_size=config["per_device_train_batch_size"],
-        per_device_eval_batch_size=config["per_device_eval_batch_size"],
-        num_train_epochs=config["num_train_epochs"],
-        learning_rate=config["learning_rate"],
-        gradient_accumulation_steps=config["gradient_accumulation_steps"],
-        evaluation_strategy=config["evaluation_strategy"],
-        eval_steps=config["eval_steps"],
-        save_strategy=config["save_strategy"],
-        save_steps=config["save_steps"],
-        logging_steps=config["logging_steps"],
-        bf16=config.get("bf16", False),
-        report_to="wandb",  # Set reporting to wandb
-        run_name=config.get("wandb_run_name"),  # Set the name for this run in wandb
-        remove_unused_columns=False,
-        # DeepSpeed config will be picked up automatically by accelerate
-        seed=config["seed"],
-        warmup_ratio=config["warmup_ratio"],
-        lr_scheduler_type=config["lr_scheduler_type"],
-        save_total_limit=config.get("save_total_limit"),
-        load_best_model_at_end=config.get("load_best_model_at_end", False),
-        metric_for_best_model=config.get("metric_for_best_model", "eval_loss"),
-    )
+    # 6. 🔽 Main Change: Create a single DPOConfig object
+    # This object now holds ALL training and DPO parameters.
+    # We add the wandb run name to the dictionary before creating the config.
+    training_params = config["training_parameters"]
+    training_params["run_name"] = config.get("wandb_run_name")
 
-    # 7. Initialize and start DPOTrainer
-    # ---------------------------------
+    dpo_config = DPOConfig(**training_params)
+
+    # 7. 🔽 Main Change: Initialize DPOTrainer with the DPOConfig object
     dpo_trainer = DPOTrainer(
-        model,
+        model=model,
         ref_model=None,
-        args=training_args,
-        beta=config["beta"],
+        args=dpo_config, # Pass the single config object here
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         tokenizer=tokenizer,
-        max_length=config["max_length"],
-        max_prompt_length=config["max_prompt_length"],
+        # All other arguments like beta, max_length, etc., are now gone
+        # as they are contained within the dpo_config object.
     )
 
     print("🚀 Starting DPO training with DeepSpeed and Wandb...")
