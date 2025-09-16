@@ -2,7 +2,7 @@
 #SBATCH --account=yejin
 #SBATCH -p yejin
 #SBATCH --gres=gpu:4
-#SBATCH --job-name=mpo
+#SBATCH --job-name=mpo_20k
 #SBATCH --output=output_20k.log
 #SBATCH --mem=128G
 
@@ -151,7 +151,6 @@ echo "Starting iteration 2"
 #    -m inpo_scripts.run_inpo \
 #    training_configs/gemma-2-9b-it-inpo-20k-iter2.yaml
 #
-#notify "iter2: train complete" $?
 
 #
 history_paths+=("/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_2/")
