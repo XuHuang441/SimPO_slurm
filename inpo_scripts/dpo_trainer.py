@@ -36,14 +36,14 @@ class INPOTrainer(SimPOTrainer):
         Computes the INPO loss.
         This is a direct adaptation of your provided loss function.
         """
+        self.beta = 10
+
         pi_logratios = policy_chosen_logps - policy_rejected_logps
         ref_logratios = reference_chosen_logps - reference_rejected_logps
 
         logits = pi_logratios - ref_logratios
 
         losses = -F.logsigmoid(self.beta * logits)
-
-        self.beta = 10
 
         chosen_rewards = self.beta * (policy_chosen_logps - reference_chosen_logps).detach()
         rejected_rewards = self.beta * (policy_rejected_logps - reference_rejected_logps).detach()
