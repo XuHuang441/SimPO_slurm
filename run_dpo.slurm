@@ -54,5 +54,5 @@ export ACCELERATE_LOG_LEVEL=info
 # Your launch command
 /hai/scratch/fangwu97/miniconda3/envs/sim/bin/accelerate launch \
     --config_file accelerate_configs/deepspeed_zero3.yaml \
-    -m dpo.train_dpo \
+    -m inpo_scripts.run_dpo \
     training_configs/gemma-2-9b-it-dpo.yaml
