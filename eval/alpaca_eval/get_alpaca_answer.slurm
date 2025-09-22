@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p yejin
-#SBATCH --gres=gpu:2
+#SBATCH -p hai-lo
+#SBATCH --gres=gpu:4
 #SBATCH --job-name=eval
 #SBATCH --output=output_eval.log
 #SBATCH --mem=128G
 
-model_name="gemma-2-9b-it_inpo_20k_stage_2"
-model_path="/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_stage_2/"
+model_name="gemma-2-9b-it_dpo_20k_stage_1_ckpt15"
+model_path="/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_dpo_20k_stage_1/checkpoint-15"
 # CUDA_VISIBLE_DEVICES=3 python get_alpaca_answer.py --model_name $model_name --model_path $model_path --conv_temp "gemma"
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
@@ -15,7 +15,7 @@ model_path="/hai/scratch/fangwu97/xu/SimPO_slurm/outputs/gemma-2-9b-it_inpo_20k_
     --model_path $model_path \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/SimPO_slurm/outputs" \
-    --tensor_parallel_size 2
+    --tensor_parallel_size 4
 
 
 
