@@ -7,6 +7,6 @@
 
 export HF_HOME=/hai/scratch/fangwu97/hf_cache
 
-/hai/scratch/fangwu97/miniconda3/envs/llmblender/bin/python preference_model_annotate.py \
+/hai/scratch/fangwu97/miniconda3/envs/llmblender/bin/python -u -m on_policy_data_gen.preference_model_annotate \
 --input_file hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/inpo_iter2/all_outputs.json \
 --output_file hai/scratch/fangwu97/xu/SimPO_slurm/on_policy_data_gen/preference_data.json
