@@ -55,7 +55,7 @@ def main(args):
         return
 
     for item in input_list[:2]:
-        user_prompt = extract_user_prompt(item["prompt"])
+        user_prompt = item["prompt"]
         if user_prompt and item.get("all_generated_responses"):
             prompts_to_rank.append(user_prompt)
             candidates_to_rank.append(item["all_generated_responses"])
