@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=test
 #SBATCH --output=output_test.log
 
