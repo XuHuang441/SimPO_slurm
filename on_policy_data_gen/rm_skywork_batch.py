@@ -6,6 +6,7 @@ import argparse
 import tqdm
 import numpy as np
 import datasets
+import torch
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
