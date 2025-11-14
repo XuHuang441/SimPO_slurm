@@ -55,7 +55,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 model = AutoModelForSequenceClassification.from_pretrained(
     args.reward_model,
-    device_map=device,          # 8B 模型放在一张卡上就够了
+    device_map="auto",
     trust_remote_code=True,
     torch_dtype=torch.bfloat16,
     cache_dir=args.cache_dir,
