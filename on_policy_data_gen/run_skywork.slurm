@@ -17,4 +17,4 @@ export HF_HOME=/hai/scratch/fangwu97/hf_cache
 --generation_file /hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split1.jsonl \
 --output_dir /hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/gemma2_ufb_part1_split1_skywork_test \
 --cache_dir "/hai/scratch/fangwu97/xu/cache" \
---batch_size 192
+--batch_size 64
