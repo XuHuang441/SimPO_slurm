@@ -1,192 +1,169 @@
-# Add batch processing to `reward_model_annotate_skywork.py` to better leverage the GPU and accelerate the pipeline.import torch
+import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import json
 import os
-import argparse
-import tqdm
-import numpy as np
-import datasets
-import torch
+from tqdm import tqdm
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--generation_file",
-    type=str,
-    default="datasets/gemma2_ultrafeedback/all_outputs.json",
-    help="Path to the output generation file",
-)
-parser.add_argument(
-    "--reward_model",
-    type=str,
-    default="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-    help="Path to reward model",
-)
-parser.add_argument(
-    "--output_dir",
-    type=str,
-    default="datasets/gemma2_ultrafeedback/",
-    help="Path to output directory",
-)
-parser.add_argument(
-    "--cache_dir",
-    type=str,
-    default=None,
-    help="Cache directory for model and dataset",
-)
-parser.add_argument(
-    "--batch_size",
-    type=int,
-    default=64,
-    help="Batch size for reward model inference",
-)
-args = parser.parse_args()
-print(args)
+# --- 1. 配置参数 ---
 
-generation_file = args.generation_file
+# 替换为你的模型和数据路径
+MODEL_NAME = "Skywork/Skywork-Reward-V2-Llama-3.1-8B"
+# 你的GPU服务器上存放模型的缓存目录
+CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"  # 你要求的 cachedir
+# 输入文件
+INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split1.jsonl"
+# 输出文件
+OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/gemma2_ufb_part1_split1_skywork_scored.jsonl"
 
-# 读取 JSONL
-with open(generation_file, "r") as f:
-    output_data = [json.loads(line) for line in f]
+# 推荐设置一个最大长度以防止OOM，4k对于RM来说通常足够
+MAX_SEQ_LENGTH = 4096
 
-# -------------------------------------------------
-# 1. 加载模型 & tokenizer
-# -------------------------------------------------
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = AutoModelForSequenceClassification.from_pretrained(
-    args.reward_model,
-    device_map="auto",
-    trust_remote_code=True,
-    torch_dtype=torch.bfloat16,
-    cache_dir=args.cache_dir,
-    attn_implementation="flash_attention_2",
-    num_labels=1,
-)
-tokenizer = AutoTokenizer.from_pretrained(args.reward_model, cache_dir=args.cache_dir)
+# --- 2. 数据加载（使用生成器节省内存） ---
+def load_data(file_path):
+    """逐行读取jsonl文件"""
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            yield json.loads(line)
 
-model.eval()
 
-# -------------------------------------------------
-# 2. 构建“全局样本列表”，每个元素是一个 (data_idx, cand_idx, prompt, candidate)
-#    然后按 batch_size 切块，一次前向算一大批
-# -------------------------------------------------
-examples = []  # 每个元素: (data_idx, cand_idx, prompt, candidate_text)
-for i, data in enumerate(output_data):
-    prompt = data["prompt"]
-    for j, cand in enumerate(data["all_generated_responses"]):
-        examples.append((i, j, prompt, cand))
+# --- 3. 主函数 ---
+def main():
+    # --- 3.1 加载模型和Tokenizer ---
+    print(f"Step 1: 正在加载模型 {MODEL_NAME}...")
+    print(f"         - Cache Dir: {CACHE_DIR}")
 
-print(f"Total (prompt, candidate) pairs: {len(examples)}")
-
-# 用一个二维 list 存所有分数，之后再回填
-all_scores = [
-    [None] * len(d["all_generated_responses"]) for d in output_data
-]
-
-batch_size = args.batch_size
-
-# -------------------------------------------------
-# 3. Batch 化打分
-# -------------------------------------------------
-for start in tqdm.tqdm(range(0, len(examples), batch_size), desc="Scoring with RM"):
-    end = min(start + batch_size, len(examples))
-    batch = examples[start:end]
-
-    # 3.1 构造 batch 的输入文本（先用 chat_template 变成字符串）
-    formatted_inputs = []
-    index_pairs = []  # (data_idx, cand_idx) 用来之后回填 scores
-    for data_idx, cand_idx, prompt, candidate in batch:
-        messages = [
-            {"role": "user", "content": prompt},
-            {"role": "assistant", "content": candidate},
-        ]
-        formatted = tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-        )
-
-        # 防止重复 bos token（有些模型会这样建议）
-        if tokenizer.bos_token is not None and formatted.startswith(tokenizer.bos_token):
-            formatted = formatted[len(tokenizer.bos_token):]
-
-        formatted_inputs.append(formatted)
-        index_pairs.append((data_idx, cand_idx))
-
-    # 3.2 一次性 tokenization + padding
-    enc = tokenizer(
-        formatted_inputs,
-        padding=True,
-        truncation=True,
-        return_tensors="pt",
-    ).to(device)
-
-    # 3.3 前向推理，取 logits 作为 reward
-    with torch.no_grad():
-        outputs = model(**enc)   # logits: [B, 1]
-        logits = outputs.logits.squeeze(-1).float().cpu().tolist()  # [B]
-
-    # 3.4 将 scores 写回 all_scores
-    for (data_idx, cand_idx), score in zip(index_pairs, logits):
-        all_scores[data_idx][cand_idx] = float(score)
-
-# 检查是否有 None 遗漏
-for i, row_scores in enumerate(all_scores):
-    if any(s is None for s in row_scores):
-        raise ValueError(f"Missing score in sample {i}")
-
-# 将分数写回原数据
-for i, data in enumerate(output_data):
-    data["all_rm_scores"] = all_scores[i]
-
-# -------------------------------------------------
-# 4. 保存带 rm 分数的文件：*_rm.json
-# -------------------------------------------------
-file_name = os.path.basename(args.generation_file).split(".json")[0] + "_rm.json"
-os.makedirs(args.output_dir, exist_ok=True)
-rm_path = os.path.join(args.output_dir, file_name)
-with open(rm_path, "w") as f:
-    json.dump(output_data, f, indent=4, ensure_ascii=False)
-
-print(f"Annotated outputs saved to {rm_path}")
-
-# -------------------------------------------------
-# 5. Binarize：选分数最高为 chosen，最低为 rejected
-# -------------------------------------------------
-for data in output_data:
-    scores = data["all_rm_scores"]
-    chosen_idx = int(np.argmax(scores))
-    rejected_idx = int(np.argmin(scores))
-
-    chosen = [
-        {"role": "user", "content": data["prompt"]},
-        {"role": "assistant", "content": data["all_generated_responses"][chosen_idx]},
-    ]
-    rejected = [
-        {"role": "user", "content": data["prompt"]},
-        {"role": "assistant", "content": data["all_generated_responses"][rejected_idx]},
-    ]
-
-    data.update(
-        {
-            "chosen": chosen,
-            "rejected": rejected,
-        }
+    tokenizer = AutoTokenizer.from_pretrained(
+        MODEL_NAME,
+        cache_dir=CACHE_DIR
     )
 
-# 保存 *_bin.json
-output_file = os.path.basename(args.generation_file).split(".json")[0] + "_bin.json"
-bin_path = os.path.join(args.output_dir, output_file)
-with open(bin_path, "w") as f:
-    json.dump(output_data, f, indent=4, ensure_ascii=False)
-print(f"Binarized outputs saved to {bin_path}")
+    model = AutoModelForSequenceClassification.from_pretrained(
+        MODEL_NAME,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",  # 自动映射到所有可用GPU (2xH100)
+        attn_implementation="flash_attention_2",
+        num_labels=1,
+        cache_dir=CACHE_DIR
+    )
+    model.eval()  # 设置为评估模式
+    print("         - 模型加载完成.")
 
-# -------------------------------------------------
-# 6. 转成 HF Dataset，保存到磁盘
-# -------------------------------------------------
-dataset_output_path = os.path.join(
-    args.output_dir,
-    os.path.basename(args.generation_file).split(".json")[0] + "_bin_dataset",
-)
-dataset = datasets.Dataset.from_list(output_data)
-dataset.save_to_disk(dataset_output_path)
-print(f"Binarized dataset saved to {dataset_output_path}")
+    # 检查BOS token，用于后续处理
+    bos_token = tokenizer.bos_token
+    strip_bos = bos_token is not None
+    if strip_bos:
+        print(f"         - 将在格式化后移除 BOS token: '{bos_token}'")
+
+    # --- 3.2 准备数据和循环 ---
+    print(f"Step 2: 开始处理文件 {INPUT_FILE}...")
+    dataset = load_data(INPUT_FILE)
+
+    # 尝试获取总行数用于tqdm进度条
+    try:
+        total_lines = sum(1 for _ in open(INPUT_FILE, 'r'))
+        print(f"         - 共找到 {total_lines} 条样本。")
+    except Exception:
+        total_lines = 0
+
+    # --- 3.3 循环打分 ---
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f_out:
+        # 使用tqdm显示进度
+        for sample in tqdm(dataset, total=total_lines, desc="Scoring responses"):
+            prompt = sample['prompt']
+            responses = sample['all_generated_responses']
+
+            # 如果没有 response，跳过打分
+            if not responses:
+                sample['skywork_v2_scores'] = []
+                f_out.write(json.dumps(sample, ensure_ascii=False) + '\n')
+                continue
+
+            # 1. 为该prompt的所有responses构建一个批次
+            conversations_batch = []
+            for resp in responses:
+                # 构建 [user, assistant] 对话
+                conv = [
+                    {"role": "user", "content": prompt},
+                    {"role": "assistant", "content": resp}
+                ]
+                conversations_batch.append(conv)
+
+            # 2. 批量应用聊天模板
+            formatted_batch = tokenizer.apply_chat_template(
+                conversations_batch,
+                tokenize=False,
+            )
+
+            # 3. 批量移除 BOS token (与你的示例逻辑一致)
+            if strip_bos:
+                formatted_batch_stripped = [
+                    s[len(bos_token):] if s.startswith(bos_token) else s
+                    for s in formatted_batch
+                ]
+            else:
+                formatted_batch_stripped = formatted_batch
+
+            # 4. 批量 Tokenize
+            inputs = tokenizer(
+                formatted_batch_stripped,
+                return_tensors="pt",
+                padding=True,  # 关键：padding到批次中的最大长度
+                truncation=True,  # 关键：截断到最大长度
+                max_length=MAX_SEQ_LENGTH
+            ).to(model.device)  # to(model.device) 确保张量在正确的GPU上
+
+            # 5. 批量推理
+            with torch.no_grad():
+                logits = model(**inputs).logits
+                # logits shape 是 [batch_size, 1]
+                # .squeeze(-1) 变为 [batch_size]
+                # .float() 从 bfloat16 转为 float (用于 .tolist())
+                scores = logits.squeeze(-1).float().cpu().tolist()
+
+            max_idx = scores.index(max(scores))
+            min_idx = scores.index(min(scores))
+
+            # 处理边缘情况
+            if max_idx == min_idx:
+                if len(scores) == 1:
+                    # 只有一个 response，chosen 和 rejected 设为同一个
+                    chosen_response = responses[0]
+                    rejected_response = responses[0]
+                else:
+                    # 多个 response 但分数全部相同
+                    # 按照惯例，取第一个为 chosen，第二个为 rejected
+                    chosen_response = responses[0]
+                    rejected_response = responses[1]
+            else:
+                # 正常情况
+                chosen_response = responses[max_idx]
+                rejected_response = responses[min_idx]
+
+            # --- 8. (新) 覆盖 sample 中的字段 ---
+
+            # 覆盖分数字段
+            sample['all_rm_scores'] = scores
+
+            # 覆盖 chosen 字段
+            sample['chosen'] = [
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": chosen_response}
+            ]
+
+            # 覆盖 rejected 字段
+            sample['rejected'] = [
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": rejected_response}
+            ]
+
+            # --- 9. 写入更新后的 sample ---
+            f_out.write(json.dumps(sample, ensure_ascii=False) + '\n')
+
+    print(f"\nStep 3: 处理完成！")
+    print(f"         - 结果已保存到: {OUTPUT_FILE}")
+
+
+# --- 4. 运行 ---
+if __name__ == "__main__":
+    main()
