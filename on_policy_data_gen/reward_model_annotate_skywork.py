@@ -21,8 +21,10 @@ args = parser.parse_args()
 print(args)
 
 generation_file = args.generation_file
+
 with open(generation_file, 'r') as f:
-    output_data = json.load(f)
+    output_data = [json.loads(line) for line in f] # for loading jsonl
+    # output_data = json.load(f) # for loading json
 
 inputs = [data["prompt"] for data in output_data]
 candidates_texts = [data["all_generated_responses"] for data in output_data]
