@@ -68,8 +68,8 @@ def main():
     model = AutoModelForSequenceClassification.from_pretrained(
         MODEL_NAME,
         torch_dtype=torch.bfloat16,
-        device_map="auto",  # 自动映射到所有可用GPU (2xH100)
-        trust_remote_code=True,  # ! 关键：必须为 ArmoRM 启用
+        device_map="cuda",
+        trust_remote_code=True,  # must enable for armorm
         cache_dir=CACHE_DIR
     )
     model.eval()  # 设置为评估模式
@@ -119,7 +119,7 @@ def main():
                 padding=True,
                 truncation=True,
                 max_length=MAX_SEQ_LENGTH,
-            )
+            ).to("cuda")
 
             # 4. 批量推理，获取分数
             with torch.no_grad():
