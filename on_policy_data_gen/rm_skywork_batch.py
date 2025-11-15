@@ -21,14 +21,38 @@ MAX_SEQ_LENGTH = 4096
 
 # --- 2. 数据加载（使用生成器节省内存） ---
 def load_data(file_path):
-    # for jsonl
-    # with open(file_path, 'r', encoding='utf-8') as f:
-    #     for line in f:
-    #         yield json.loads(line)
+    suffix = os.path.splitext(file_path)[1].lower()
 
-    # for json
-    with open(file_path, 'r', encoding='utf-8') as f:
-        yield json.load(f)
+    # JSONL: 一行一个 JSON 对象
+    if suffix in [".jsonl", ".jsonlines", ".ljson"]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                yield json.loads(line)
+
+    # JSON: 整个文件可能是 list 或 dict
+    elif suffix == ".json":
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # 如果是 list → 逐个 yield
+        if isinstance(data, list):
+            for item in data:
+                yield item
+
+        # 如果是 dict → 只 yield 一次
+        elif isinstance(data, dict):
+            yield data
+
+        else:
+            raise ValueError("JSON 文件顶层必须是 list 或 dict")
+
+    else:
+        raise ValueError(f"Unsupported file format: {suffix}")
+
+
 
 
 # --- 3. 主函数 ---
