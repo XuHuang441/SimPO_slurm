@@ -119,7 +119,7 @@ def main():
                 padding=True,
                 truncation=True,
                 max_length=MAX_SEQ_LENGTH,
-            ).to(model.device)
+            )
 
             # 4. 批量推理，获取分数
             with torch.no_grad():
