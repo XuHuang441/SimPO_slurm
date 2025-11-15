@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=skywork
 #SBATCH --output=output_skywork.log
 
