@@ -9,11 +9,11 @@ from tqdm import tqdm
 # 替换为你的模型和数据路径
 MODEL_NAME = "Skywork/Skywork-Reward-V2-Llama-3.1-8B"
 # 你的GPU服务器上存放模型的缓存目录
-CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"  # 你要求的 cachedir
+CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"
 # 输入文件
-INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split1.jsonl"
+INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_skywork/all_outputs.json"
 # 输出文件
-OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/gemma2_ufb_part1_split1_skywork_scored.jsonl"
+OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_skywork_scored.jsonl"
 
 # 推荐设置一个最大长度以防止OOM，4k对于RM来说通常足够
 MAX_SEQ_LENGTH = 4096
@@ -21,10 +21,14 @@ MAX_SEQ_LENGTH = 4096
 
 # --- 2. 数据加载（使用生成器节省内存） ---
 def load_data(file_path):
-    """逐行读取jsonl文件"""
+    # for jsonl
+    # with open(file_path, 'r', encoding='utf-8') as f:
+    #     for line in f:
+    #         yield json.loads(line)
+
+    # for json
     with open(file_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            yield json.loads(line)
+        yield json.load(f)
 
 
 # --- 3. 主函数 ---

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:4
 #SBATCH --job-name=skywork
 #SBATCH --output=output_skywork.log
 
@@ -12,5 +12,4 @@ export HF_HOME=/hai/scratch/fangwu97/hf_cache
 #--output_dir /hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/gemma2_ufb_part1_split1_skywork \
 #--cache_dir "/hai/scratch/fangwu97/xu/cache"
 
-# batchsize=200 is tuned for h200
 /hai/scratch/fangwu97/miniconda3/envs/sim/bin/python -u -m on_policy_data_gen.rm_skywork_batch
