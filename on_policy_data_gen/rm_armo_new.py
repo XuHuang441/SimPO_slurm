@@ -113,7 +113,7 @@ def main():
 
             # 3. 批量 Tokenize (与 ArmoRM 示例一致)
             # 这种方式更高效，直接一步到位
-            inputs = tokenizer.apply_chat_template(
+            input_ids = tokenizer.apply_chat_template(
                 conversations_batch,
                 return_tensors="pt",
                 padding=True,
@@ -123,8 +123,7 @@ def main():
 
             # 4. 批量推理，获取分数
             with torch.no_grad():
-                # ArmoRM 返回一个包含 .score 的 output 对象
-                output = model(**inputs)
+                output = model(input_ids)
                 # 分数在 output.score 属性中, shape: [batch_size]
                 scores = output.score.float().cpu().tolist()
 
