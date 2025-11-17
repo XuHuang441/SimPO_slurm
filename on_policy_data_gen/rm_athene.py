@@ -1,51 +1,46 @@
+import argparse
 import json
+import os
+from typing import Dict, List, Iterable, Any
+
 import torch
 from torch import nn
+from tqdm import tqdm
+
 from transformers import (
     LlamaModel,
     LlamaPreTrainedModel,
-    TextClassificationPipeline,
     AutoTokenizer,
-    pipeline
+    pipeline,
+    TextClassificationPipeline,
 )
-from typing import Dict, List, Any, Generator
-from tqdm import tqdm
-import os
-
-# ================= 配置区域 =================
-INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split1.jsonl"
-OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter1_athene_scored.jsonl"
-# 请将其替换为你实际的缓存路径
-CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"
-MODEL_NAME = "Nexusflow/Athene-RM-8B"
-
-# 确保缓存目录存在
-os.makedirs(CACHE_DIR, exist_ok=True)
 
 
-# ================= 模型定义 (保持你提供的代码一致) =================
-
+# ======================
+# 1. Athene 模型定义
+# ======================
 class AtheneForSequenceClassification(LlamaPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.model = LlamaModel(config)
         self.v_head = nn.Linear(config.hidden_size, 1, bias=False)
+        # Athene 使用的打分标记，一般是 <|score|> = 128003
         self.CLS_ID = 128003
-        # Initialize weights and apply final processing
         self.post_init()
 
     def get_device(self):
         return self.model.device
 
     def forward(
-            self,
-            input_ids=None,
-            past_key_values=None,
-            attention_mask=None,
-            position_ids=None,
+        self,
+        input_ids=None,
+        past_key_values=None,
+        attention_mask=None,
+        position_ids=None,
+        **kwargs,
     ):
         transformer_outputs = self.model(
-            input_ids,
+            input_ids=input_ids,
             attention_mask=attention_mask,
             position_ids=position_ids,
             output_hidden_states=True,
@@ -55,25 +50,37 @@ class AtheneForSequenceClassification(LlamaPreTrainedModel):
 
         bs = int(input_ids.shape[0])
         scores = []
+
         for i in range(bs):
-            # 找到 CLS token 的位置
             c_inds = (input_ids[i] == self.CLS_ID).nonzero()
-            if c_inds.numel() > 0:
-                c_ind = c_inds[-1].item()
-                scores.append(rewards[i, c_ind])
+            if c_inds.numel() == 0:
+                # 如果没找到 CLS token，就用最后一个 token 的得分兜底
+                c_ind = -1
             else:
-                # Fallback if CLS token not found (rare case handling)
-                scores.append(rewards[i, -1])
+                c_ind = c_inds[-1].item()
+            scores.append(rewards[i, c_ind])
 
         scores = torch.stack(scores)
         return {"scores": scores}
 
 
+# ======================
+# 2. Pipeline 定义
+# ======================
 class AtheneRewardPipeline(TextClassificationPipeline):
     def preprocess(self, inputs, **tokenizer_kwargs) -> Dict[str, torch.Tensor]:
-        return_tensors = self.framework
-        # 应用 chat template
-        formatted = self.tokenizer.apply_chat_template(inputs, tokenize=False)
+        """
+        inputs: 单条样本的 messages (list[{"role": ..., "content": ...}])
+        """
+        return_tensors = self.framework  # "pt"
+
+        # 使用 chat_template 格式化
+        formatted = self.tokenizer.apply_chat_template(
+            inputs,
+            tokenize=False,
+        )
+
+        # 在末尾加上 CLS token（用于取分数的特殊 token）
         formatted = formatted + self.tokenizer.cls_token
 
         return self.tokenizer(
@@ -85,132 +92,156 @@ class AtheneRewardPipeline(TextClassificationPipeline):
         )
 
     def postprocess(self, model_outputs, function_to_apply=None, top_k=1, _legacy=True):
-        return model_outputs["scores"].cpu().float().item()
+        # 返回一个 Python float
+        return float(model_outputs["scores"].cpu().float().item())
 
 
-def load_data_generator(file_path: str) -> tuple[Generator[Dict, None, None], int]:
-    """
-    读取数据，兼容 json 和 jsonl。
-    返回: (数据生成器, 数据总条数)
-    """
-    _, ext = os.path.splitext(file_path)
-    ext = ext.lower()
-
-    if ext == '.json':
-        print(f"Detected JSON format: {file_path}")
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                if isinstance(data, list):
-                    return iter(data), len(data)
-                else:
-                    # 只有一个对象的情况
-                    return iter([data]), 1
-        except json.JSONDecodeError:
-            # 如果扩展名是json但内容是jsonl，尝试回退到按行读取
-            print("Warning: Failed to parse as JSON list, trying JSONL mode...")
-            return _load_jsonl(file_path)
-
-    else:  # 默认为 jsonl
-        print(f"Detected JSONL format: {file_path}")
-        return _load_jsonl(file_path)
+# ======================
+# 3. IO 工具：json / jsonl
+# ======================
+def read_jsonl(path: str) -> Iterable[Dict[str, Any]]:
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            yield json.loads(line)
 
 
-def _load_jsonl(file_path):
-    # 先扫一遍文件计算行数用于 tqdm
-    print("Counting lines for progress bar...")
-    with open(file_path, 'r', encoding='utf-8') as f:
-        total_lines = sum(1 for line in f if line.strip())
+def read_json(path: str) -> Iterable[Dict[str, Any]]:
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
-    def generator():
-        with open(file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.strip():
-                    try:
-                        yield json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
+    # 最常见两种结构：list 或 {"data": [...]} / {"train": [...]}
+    if isinstance(data, list):
+        for item in data:
+            yield item
+    elif isinstance(data, dict):
+        # 尝试拿第一个 list value 当作数据
+        for v in data.values():
+            if isinstance(v, list):
+                for item in v:
+                    yield item
+                break
+    else:
+        raise ValueError("Unsupported json structure")
 
-    return generator(), total_lines
 
-# ================= 主处理逻辑 =================
+def iter_dataset(path: str) -> Iterable[Dict[str, Any]]:
+    ext = os.path.splitext(path)[1].lower()
+    if ext == ".jsonl":
+        return read_jsonl(path)
+    elif ext == ".json":
+        return read_json(path)
+    else:
+        raise ValueError(f"Unsupported file extension: {ext}, only .json / .jsonl are supported.")
+
+
+# ======================
+# 4. 评分逻辑
+# ======================
+def build_messages(prompt: str, answer: str) -> List[Dict[str, str]]:
+    """构造 chat 模式的 messages，和你示例里的 chosen/rejected 格式保持一致。"""
+    return [
+        {"role": "user", "content": prompt},
+        {"role": "assistant", "content": answer},
+    ]
+
 
 def main():
-    print(f"Loading model: {MODEL_NAME}...")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_file", type=str, required=True,
+                        help="Path to input json/jsonl file (gemma2_ufb_part1_split1.jsonl)")
+    parser.add_argument("--output_file", type=str, required=True,
+                        help="Path to output jsonl file")
+    parser.add_argument("--cache_dir", type=str, default=None,
+                        help="HF cache dir for model/tokenizer")
+    parser.add_argument("--batch_size", type=int, default=8,
+                        help="Batch size for Athene pipeline")
+    args = parser.parse_args()
 
-    # 1. 加载 Tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(
-        MODEL_NAME,
-        cache_dir=CACHE_DIR,
-        trust_remote_code=True
-    )
-
-    # 2. 加载 Model (使用 bfloat16 以适配 H100 性能)
+    # ======================
+    # 4.1 加载模型和 tokenizer
+    # ======================
+    print("Loading Athene-RM-8B ...")
     model = AtheneForSequenceClassification.from_pretrained(
-        MODEL_NAME,
-        dtype=torch.bfloat16,
-        device_map="auto",  # 自动分配到 GPU
-        cache_dir=CACHE_DIR,
-        trust_remote_code=True
+        "Nexusflow/Athene-RM-8B",
+        torch_dtype=torch.bfloat16,
+        cache_dir=args.cache_dir,
+        device_map="auto",  # 让 HF 自动在 2×H100 上切分
     )
 
-    # 3. 初始化 Pipeline
-    reward_pipe = pipeline(
+    tokenizer = AutoTokenizer.from_pretrained(
+        "Nexusflow/Athene-RM-8B",
+        cache_dir=args.cache_dir,
+    )
+
+    # 确保有 cls_token（Athene 一般有）
+    if tokenizer.cls_token is None:
+        raise ValueError("Tokenizer has no cls_token, but Athene RM expects one.")
+
+    # pad_token（保险处理一下）
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+        model.config.pad_token_id = tokenizer.eos_token_id
+
+    rm_pipe = pipeline(
         task="text-classification",
         model=model,
         tokenizer=tokenizer,
         pipeline_class=AtheneRewardPipeline,
-        device_map="auto",
+        device_map="auto",  # 再声明一下，让 pipeline 正确使用多卡
     )
 
-    print("Starting processing...")
+    # ======================
+    # 4.2 遍历数据、打分、写出
+    # ======================
+    os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
+    fout = open(args.output_file, "w", encoding="utf-8")
 
-    data_iter, total_count = load_data_generator(INPUT_FILE)
-    print(total_count)
+    data_iter = iter_dataset(args.input_file)
 
-    # 以 append 模式写入，如果是重新运行建议先手动删除旧文件
-    if os.path.exists(OUTPUT_FILE):
-        print(f"Warning: Output file {OUTPUT_FILE} exists. Appending to it.")
+    for sample in tqdm(data_iter, desc="Scoring"):
+        # 期望的 key：prompt_id, prompt, all_generated_responses, ...
+        prompt_id = sample.get("prompt_id")
+        prompt = sample["prompt"]
+        responses: List[str] = sample["all_generated_responses"]
 
-        with open(OUTPUT_FILE, 'a', encoding='utf-8') as fout:
+        # 为每个 candidate 构造 messages
+        all_messages = [build_messages(prompt, resp) for resp in responses]
 
-            for data in tqdm(data_iter, total=total_count, desc="Scoring"):
-                prompt = data.get('prompt', "")
-                responses = data.get('all_generated_responses', [])
+        # 调用 reward model 打分（批量）
+        # rm_pipe 支持传入 list[ messages ]，再配合 batch_size
+        scores: List[float] = rm_pipe(
+            all_messages,
+            batch_size=args.batch_size,
+        )
 
-                if not responses:
-                    # 如果没有回复，直接写回原数据（可选）
-                    fout.write(json.dumps(data, ensure_ascii=False) + '\n')
-                    continue
+        # 找到最高 / 最低
+        import numpy as np
 
-                # 构建 pipeline 输入
-                pipe_inputs = []
-                for resp in responses:
-                    pipe_inputs.append([
-                        {"role": 'user', "content": prompt},
-                        {"role": "assistant", "content": resp}
-                    ])
+        scores_array = np.array(scores, dtype=float)
+        best_idx = int(scores_array.argmax())
+        worst_idx = int(scores_array.argmin())
 
-                # 批量推理
-                try:
-                    scores = reward_pipe(pipe_inputs, batch_size=len(pipe_inputs))
-                except Exception as e:
-                    print(f"\nError processing prompt_id {data.get('prompt_id')}: {e}")
-                    continue
+        best_resp = responses[best_idx]
+        worst_resp = responses[worst_idx]
 
-                data['all_rm_scores'] = scores
+        chosen = build_messages(prompt, best_resp)
+        rejected = build_messages(prompt, worst_resp)
 
-                # 找到 chosen / rejected
-                max_score_idx = scores.index(max(scores))
-                min_score_idx = scores.index(min(scores))
+        # 构造输出样本：
+        # 在原始 sample 的基础上覆盖 all_rm_scores, chosen, rejected
+        out_sample = dict(sample)
+        out_sample["all_rm_scores"] = [float(s) for s in scores]  # 确保是普通 float
+        out_sample["chosen"] = chosen
+        out_sample["rejected"] = rejected
 
-                data['chosen'] = pipe_inputs[max_score_idx]
-                data['rejected'] = pipe_inputs[min_score_idx]
+        fout.write(json.dumps(out_sample, ensure_ascii=False) + "\n")
 
-                # 写入一行 (JSONL格式)
-                fout.write(json.dumps(data, ensure_ascii=False) + '\n')
+    fout.close()
+    print("Done! Saved to", args.output_file)
 
-    print(f"\nProcessing complete. Output saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()
