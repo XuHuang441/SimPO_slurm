@@ -11,9 +11,9 @@ MODEL_NAME = "Skywork/Skywork-Reward-V2-Llama-3.1-8B"
 # 你的GPU服务器上存放模型的缓存目录
 CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"
 # 输入文件
-INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_skywork/all_outputs.json"
+INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter3_skywork/all_outputs.json"
 # 输出文件
-OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_skywork_scored.jsonl"
+OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter3_skywork_scored.jsonl"
 
 # 推荐设置一个最大长度以防止OOM，4k对于RM来说通常足够
 MAX_SEQ_LENGTH = 4096
