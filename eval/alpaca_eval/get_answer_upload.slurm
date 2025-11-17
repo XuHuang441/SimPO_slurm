@@ -9,10 +9,10 @@
 set -e
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
-    --model_name gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.85_eta0.01 \
-    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.85_eta0.01 \
+    --model_name gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.9_eta0.0075 \
+    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.9_eta0.0075 \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
     --tensor_parallel_size 2
 
-huggingface-cli upload XuHuang/inpo_iter1 res/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.85_eta0.01.json
+huggingface-cli upload XuHuang/inpo_iter1 res/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.9_eta0.0075.json
