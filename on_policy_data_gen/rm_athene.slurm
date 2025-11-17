@@ -11,4 +11,4 @@ export HF_HOME=/hai/scratch/fangwu97/hf_cache
     --input_file /hai/scratch/fangwu97/xu/SimPO_slurm/data/gemma2_ufb_part1_20k/gemma2_ufb_part1_split1.jsonl \
     --output_file /hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter1_athene_scored.jsonl \
     --cache_dir /hai/scratch/fangwu97/xu/cache \
-    --batch_size 8
+    --batch_size 256
