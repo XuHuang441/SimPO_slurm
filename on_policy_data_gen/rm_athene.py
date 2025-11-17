@@ -148,7 +148,7 @@ def main():
     # 2. 加载 Model (使用 bfloat16 以适配 H100 性能)
     model = AtheneForSequenceClassification.from_pretrained(
         MODEL_NAME,
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
         device_map="auto",  # 自动分配到 GPU
         cache_dir=CACHE_DIR,
         trust_remote_code=True
@@ -166,6 +166,7 @@ def main():
     print("Starting processing...")
 
     data_iter, total_count = load_data_generator(INPUT_FILE)
+    print(total_count)
 
     # 以 append 模式写入，如果是重新运行建议先手动删除旧文件
     if os.path.exists(OUTPUT_FILE):

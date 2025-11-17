@@ -63,7 +63,7 @@ class AtheneRewardPipeline(TextClassificationPipeline):
         return model_outputs["scores"].cpu().float().item()
 
 # Initialize the model
-model = AtheneForSequenceClassification.from_pretrained("Nexusflow/Athene-RM-8B", torch_dtype=bfloat16, cache_dir="/hai/scratch/fangwu97/xu/cache")
+model = AtheneForSequenceClassification.from_pretrained("Nexusflow/Athene-RM-8B", dtype=bfloat16, cache_dir="/hai/scratch/fangwu97/xu/cache")
 tokenizer = AutoTokenizer.from_pretrained("Nexusflow/Athene-RM-8B", cache_dir="/hai/scratch/fangwu97/xu/cache")
 
 # Initialize the pipeline
