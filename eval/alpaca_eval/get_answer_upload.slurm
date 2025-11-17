@@ -6,20 +6,13 @@
 #SBATCH --output=output_eval.log
 #SBATCH --mem=128G
 
-srun --exclusive --gpus-per-task=2 \
+set -e
+
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
     --model_name gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.85_eta0.01 \
     --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.85_eta0.01 \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
-    --tensor_parallel_size 2 &
+    --tensor_parallel_size 2
 
-#srun --exclusive --gpus-per-task=2 \
-#/hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
-#    --model_name gemma-2-9b-it_mnpo_stage_2_armo_puredpoloss_beta5 \
-#    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_armo_puredpoloss_beta5 \
-#    --conv_temp "gemma" \
-#    --cache_dir "/hai/scratch/fangwu97/xu/cache" \
-#    --tensor_parallel_size 2 &
-
-wait
+huggingface-cli upload XuHuang/inpo_iter1 res/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.85_eta0.01.json
