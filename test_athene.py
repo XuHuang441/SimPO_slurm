@@ -1,4 +1,4 @@
-from transformers import LlamaModel, LlamaPreTrainedModel, TextClassificationPipeline
+from transformers import LlamaModel, LlamaPreTrainedModel, TextClassificationPipeline, AutoTokenizer, pipeline
 from torch import nn
 import torch
 from typing import Dict
@@ -69,8 +69,8 @@ tokenizer = AutoTokenizer.from_pretrained("Nexusflow/Athene-RM-8B", cache_dir="/
 # Initialize the pipeline
 pipe = pipeline(
             task="text-classification",
-            model=self.model,
-            tokenizer=self.tokenizer,
+            model=model,
+            tokenizer=tokenizer,
             pipeline_class=AtheneRewardPipeline,
             device_map="auto",
         )
