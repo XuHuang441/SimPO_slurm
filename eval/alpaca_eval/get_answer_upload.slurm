@@ -8,11 +8,24 @@
 
 set -e
 
+# =============================
+# 统一变量
+# =============================
+MODEL_NAME="gemma-2-9b-it_mnpo_stage_3_armo_ratio0.85_eta0.005_weights0-1"
+MODEL_PATH="/hai/scratch/fangwu97/xu/MNPO/outputs/$MODEL_NAME"
+OUTPUT_JSON="res/${MODEL_NAME}.json"
+
+# =============================
+# 运行eval
+# =============================
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
-    --model_name gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.9_eta0.0075 \
-    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.9_eta0.0075 \
+    --model_name "$MODEL_NAME" \
+    --model_path "$MODEL_PATH" \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
     --tensor_parallel_size 2
 
-huggingface-cli upload XuHuang/inpo_iter1 res/gemma-2-9b-it_mnpo_stage_2_skywork_ratio0.9_eta0.0075.json
+# =============================
+# 上传到 HuggingFace
+# =============================
+huggingface-cli upload XuHuang/inpo_iter1 "$OUTPUT_JSON"
