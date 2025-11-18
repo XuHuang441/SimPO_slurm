@@ -8,8 +8,8 @@
 #SBATCH --mem=128G
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
-    --model_name gemma-2-9b-it_mnpo_stage_3_armo_ratio0.85_eta0.005_weights0-1 \
-    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_3_armo_ratio0.85_eta0.005_weights0-1 \
+    --model_name gemma-2-9b-it_mnpo_stage_1_athene_beta5_ratio0.33_eta0.005 \
+    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_1_athene_beta5_ratio0.33_eta0.005 \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
     --tensor_parallel_size 1
