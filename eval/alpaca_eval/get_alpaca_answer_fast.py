@@ -53,7 +53,7 @@ if __name__ == "__main__":
     llm = LLM(
         model=script_args.model_path,
         tokenizer=script_args.model_path,
-        dtype="bfloat16",
+        dtype="float16",
         # ✨ CHANGE: Use all available GPUs for tensor parallelism
         tensor_parallel_size=script_args.tensor_parallel_size,
         max_model_len=script_args.max_new_tokens,
