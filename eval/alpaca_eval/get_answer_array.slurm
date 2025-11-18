@@ -2,12 +2,22 @@
 #SBATCH --account=yejin
 #SBATCH -p yejin
 #SBATCH --gres=gpu:2
-#SBATCH --job-name=eval
-#SBATCH --output=output_eval.log
+#SBATCH --job-name=eval_array
+#SBATCH --output=output_eval_%A_%a.log
 #SBATCH --mem=128G
+#SBATCH --array=0-4
 
 # run one gen and then upload
 set -e
+
+MODEL_NAMES=(
+  "gemma-2-9b-it-mnpo-iter3-armo.yaml"
+  "gemma-2-9b-it-mnpo-iter3-armo2.yaml"
+  "gemma-2-9b-it-mnpo-iter2-armo-ratio0.86.yaml"
+  "gemma-2-9b-it-mnpo-iter1-athene2.yaml"
+  "gemma-2-9b-it-mnpo-iter1-athene3.yaml"
+  "gemma-2-9b-it-mnpo-iter1-athene4.yaml"
+)
 
 # =============================
 # 统一变量
