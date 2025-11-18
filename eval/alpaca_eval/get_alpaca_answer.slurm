@@ -2,7 +2,6 @@
 #SBATCH --account=yejin
 #SBATCH -p yejin
 #SBATCH --gres=gpu:1
-#SBATCH --nodelist=haic-hgx-7
 #SBATCH --job-name=eval
 #SBATCH --output=output_eval.log
 #SBATCH --mem=128G
