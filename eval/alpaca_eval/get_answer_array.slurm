@@ -3,10 +3,9 @@
 #SBATCH -p yejin
 #SBATCH --gres=gpu:2
 #SBATCH --job-name=eval_array
-#SBATCH --output=output_eval_%A_%a.log
+#SBATCH --output=logs/output_eval_%A_%a.log
 #SBATCH --mem=128G
-#SBATCH --nodelist=haic-hgx-7
-#SBATCH --array=0-5
+#SBATCH --array=0-3
 
 # run one gen and then upload
 # !!!! check sbatch array aligns with number of tasks
@@ -14,12 +13,10 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_3_armo_ratio0.85_eta0.005_weights0.2-0.8"
-  "gemma-2-9b-it_mnpo_stage_3_armo_ratio0.85_eta0.005_weights1-0"
-  "gemma-2-9b-it_mnpo_stage_1_athene_beta10_ratio0.33_eta0.0075"
-  "gemma-2-9b-it_mnpo_stage_1_athene_beta10_ratio0.33_eta0.005"
-  "gemma-2-9b-it_mnpo_stage_1_athene_beta5_ratio0.33_eta0.005"
-  "gemma-2-9b-it_mnpo_stage_1_athene_beta1_ratio0.33_eta0.005"
+  "gemma-2-9b-it_mnpo_stage_2_athene_ratio0.85_eta0.005_weights0-1"
+  "gemma-2-9b-it_mnpo_stage_2_athene_ratio0.85_eta0.005_weights0.75-0.25"
+  "gemma-2-9b-it_mnpo_stage_2_athene_ratio0.85_eta0.005_weights0.25-0.75"
+  "gemma-2-9b-it_mnpo_stage_2_athene_ratio0.85_eta0.005_weights1-0"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
