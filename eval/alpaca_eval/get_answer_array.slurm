@@ -17,10 +17,10 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_2_armo_beta1_ratio0.85_eta0.005_weights0-1"
-  "gemma-2-9b-it_mnpo_stage_2_armo_beta1_ratio0.85_eta0.005_weights0.25-0.75"
-  "gemma-2-9b-it_mnpo_stage_2_armo_beta1_ratio0.85_eta0.005_weights0.75-0.25"
-  "gemma-2-9b-it_mnpo_stage_2_armo_beta1_ratio0.85_eta0.005_weights1-0"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.85_eta0.005_weights0-1"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.85_eta0.005_weights0.25-0.75"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.85_eta0.005_weights0.75-0.25"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.85_eta0.005_weights1-0"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
