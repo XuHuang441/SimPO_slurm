@@ -5,11 +5,12 @@
 #SBATCH --job-name=eval_array
 #SBATCH --output=logs/output_eval_%A_%a.log
 #SBATCH --mem=128G
-#SBATCH --array=0-3
+#SBATCH --array=0-1
 
 # run one gen and then upload
 
-# sbatch eval/alpaca_eval/get_answer_array.slurm
+# customize the pid
+# sbatch --dependency=afterok:39987_3 eval/alpaca_eval/get_answer_array.slurm
 
 # !!!! check sbatch array aligns with number of tasks
 # 0-5 = 6
@@ -17,10 +18,8 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights0-1"
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights0.25-0.75"
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights0.75-0.25"
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights1-0"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.85_eta0.01_weights0.25-0.75"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.85_eta0.01_weights0.75-0.25"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
