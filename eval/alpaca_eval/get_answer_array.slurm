@@ -8,8 +8,12 @@
 #SBATCH --array=0-3
 
 # run one gen and then upload
+
+# sbatch eval/alpaca_eval/get_answer_array.slurm
+
 # !!!! check sbatch array aligns with number of tasks
 # 0-5 = 6
+
 set -e
 
 MODEL_NAMES=(
