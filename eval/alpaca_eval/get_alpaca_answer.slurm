@@ -9,8 +9,8 @@
 # sbatch eval/alpaca_eval/get_alpaca_answer.slurm
 
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
-    --model_name gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.75_eta0.01_weights0.25-0.75_3pl \
-    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.75_eta0.01_weights0.25-0.75_3pl \
+    --model_name gemma-2-9b-it_mnpo_stage_2_skywork_beta5_ratio0.8_eta0.1_weights0.25-0.75_3pl \
+    --model_path /hai/scratch/fangwu97/xu/MNPO/outputs/gemma-2-9b-it_mnpo_stage_2_skywork_beta5_ratio0.8_eta0.1_weights0.25-0.75_3pl \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
     --tensor_parallel_size 1
