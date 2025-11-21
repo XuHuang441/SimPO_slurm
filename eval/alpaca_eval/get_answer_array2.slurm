@@ -10,7 +10,7 @@
 # run one gen and then upload
 
 # customize the pid
-# sbatch --dependency=afterok:40244_2 eval/alpaca_eval/get_answer_array2.slurm
+# sbatch --dependency=afterok:40390_2 eval/alpaca_eval/get_answer_array2.slurm
 
 # !!!! check sbatch array aligns with number of tasks
 # 0-5 = 6
@@ -18,9 +18,9 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights1-0_3pl"
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights0.75-0.25_3pl"
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta3_ratio0.85_eta0.01_weights1-0_3pl"
+  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights1-0_3pl_fixed"
+  "gemma-2-9b-it_mnpo_stage_2_skywork_beta10_ratio0.85_eta0.01_weights0.75-0.25_3pl_fixed"
+  "gemma-2-9b-it_mnpo_stage_2_skywork_beta3_ratio0.85_eta0.01_weights1-0_3pl_fixed"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
