@@ -18,8 +18,8 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta7_ratio0.8_eta0.01_weights0.25-0.75_3pl"
-  "gemma-2-9b-it_mnpo_stage_2_skywork_beta3_ratio0.8_eta0.01_weights0.25-0.75_3pl"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta10_ratio0.33_eta0.005_td"
+  "gemma-2-9b-it_mnpo_stage_2_armo_beta3_ratio0.85_eta0.005_td"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
