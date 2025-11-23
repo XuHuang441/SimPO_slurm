@@ -10,7 +10,7 @@
 # run one gen and then upload
 
 # customize the pid
-# sbatch --dependency=afterok:40936_1 eval/alpaca_eval/get_answer_array.slurm
+# sbatch --dependency=afterok:40974 eval/alpaca_eval/get_answer_array.slurm
 
 # !!!! check sbatch array aligns with number of tasks
 # 0-5 = 6
