@@ -5,7 +5,7 @@
 #SBATCH --job-name=eval_array
 #SBATCH --output=logs/output_eval_%A_%a.log
 #SBATCH --mem=128G
-#SBATCH --array=0-1
+#SBATCH --array=0
 
 # run one gen and then upload
 
@@ -18,9 +18,7 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_3_armo_dpo_beta5_het0.01_weights0.25-0.75"
-  "gemma-2-9b-it_mnpo_stage_3_armo_dpo_beta5_het0.001_weights0.25-0.75"
-
+  "gemma-2-9b-it_mnpo_stage_4_armo_dpo_beta5_het0.001_weights0.1-0.1-0.8"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
