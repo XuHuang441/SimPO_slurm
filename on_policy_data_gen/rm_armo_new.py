@@ -11,9 +11,9 @@ MODEL_NAME = "RLHFlow/ArmoRM-Llama3-8B-v0.1"
 # 你的GPU服务器上存放模型的缓存目录
 CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"  # 你要求的 cachedir
 # 输入文件
-INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter3_armo/all_outputs.json"
+INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_armo_abl/all_outputs.json"
 # 输出文件 (DPO-ready format)
-OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter3_armo_scored.jsonl"
+OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_armo_abl_scored.jsonl"
 
 # ArmoRM 示例中使用的最大长度
 MAX_SEQ_LENGTH = 4096
