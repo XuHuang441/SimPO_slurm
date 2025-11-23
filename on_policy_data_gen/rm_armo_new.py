@@ -3,18 +3,25 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import json
 import os
 from tqdm import tqdm
+from dataclasses import dataclass, field
+from transformers import HfArgumentParser
 
 # --- 1. 配置参数 ---
 
-# 替换为你的模型和数据路径
-MODEL_NAME = "RLHFlow/ArmoRM-Llama3-8B-v0.1"
-# 你的GPU服务器上存放模型的缓存目录
-CACHE_DIR = "/hai/scratch/fangwu97/xu/cache"  # 你要求的 cachedir
-# 输入文件
-INPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_armo_abl/all_outputs.json"
-# 输出文件 (DPO-ready format)
-OUTPUT_FILE = "/hai/scratch/fangwu97/xu/SimPO_slurm/datasets/gemma2_ultrafeedback/mnpo_iter2_armo_abl_scored.jsonl"
+@dataclass
+class ScriptArgs:
+    cache_dir: str = field(metadata={"help": "cache directory"})
+    input_file: str = field(metadata={"help": "input json/jsonl"})
+    output_file: str = field(metadata={"help": "output jsonl"})
 
+parser = HfArgumentParser(ScriptArgs)
+args = parser.parse_args_into_dataclasses()[0]
+
+# parameters configuration
+MODEL_NAME = "RLHFlow/ArmoRM-Llama3-8B-v0.1"
+CACHE_DIR = args.cache_dir
+INPUT_FILE = args.input_file
+OUTPUT_FILE = args.output_file
 # ArmoRM 示例中使用的最大长度
 MAX_SEQ_LENGTH = 4096
 
@@ -54,6 +61,7 @@ def load_data(file_path):
 
 # --- 3. 主函数 ---
 def main():
+
     # --- 3.1 加载模型和Tokenizer ---
     print(f"Step 1: 正在加载模型 {MODEL_NAME}...")
     print(f"         - Cache Dir: {CACHE_DIR}")
