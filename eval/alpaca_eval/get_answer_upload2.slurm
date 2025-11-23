@@ -12,7 +12,7 @@ set -e
 # =============================
 # 统一变量
 # =============================
-MODEL_NAME="gemma-2-9b-it_mnpo_stage_2_skywork_beta3_ratio0.85_eta0.01_weights0.25-0.75_3pl_fixed"
+MODEL_NAME="gemma-2-9b-it_mnpo_stage_3_armo_dpo_beta5_het0.001_weights0.25-0.75"
 MODEL_PATH="/hai/scratch/fangwu97/xu/MNPO/outputs/$MODEL_NAME"
 OUTPUT_JSON="res/${MODEL_NAME}.json"
 
