@@ -49,6 +49,8 @@ if __name__ == "__main__":
     output_dir = "res"
     os.makedirs(output_dir, exist_ok=True)
 
+    tokenizer = AutoTokenizer.from_pretrained(script_args.model_path, cache_dir=script_args.cache_dir)
+
     # initialize model
     logger.info(f"Loading model from: {script_args.model_path}")
     llm = LLM(
@@ -68,7 +70,6 @@ if __name__ == "__main__":
     eval_set = load_dataset("tatsu-lab/alpaca_eval", "alpaca_eval", trust_remote_code=True)["eval"]
 
     # set up sampling parameters
-    tokenizer = AutoTokenizer.from_pretrained(script_args.model_path, cache_dir=script_args.cache_dir)
 
     sampling_params = SamplingParams(
         temperature=script_args.temperature,
