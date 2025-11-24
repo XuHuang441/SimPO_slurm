@@ -19,6 +19,7 @@ OUTPUT_JSON="res/${MODEL_NAME}.json"
 # 运行eval
 # =============================
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_new.py \
+    --model_name "$MODEL_NAME" \
     --model_path "$MODEL_NAME" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
     --tensor_parallel_size 2

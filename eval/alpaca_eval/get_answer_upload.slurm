@@ -12,8 +12,8 @@ set -e
 # =============================
 # 统一变量
 # =============================
-MODEL_NAME="gemma-2-9b-it_mnpo_stage_3_armo_dpo_beta2_hetp_weights0.25-0.75"
-MODEL_PATH="/hai/scratch/fangwu97/xu/MNPO/outputs/$MODEL_NAME"
+MODEL_NAME="Llama-3.1-Tulu-3-70B-DPO"
+MODEL_PATH="/hai/scratch/fangwu97/huggingface/hub/models--allenai--Llama-3.1-Tulu-3-70B-DPO/snapshots/2dab5183da9252bedf6039a0b09c86b9ca4d0ba9/"
 OUTPUT_JSON="res/${MODEL_NAME}.json"
 
 # =============================
@@ -22,7 +22,7 @@ OUTPUT_JSON="res/${MODEL_NAME}.json"
 /hai/scratch/fangwu97/miniconda3/envs/inpo/bin/python /hai/scratch/fangwu97/xu/SimPO_slurm/eval/alpaca_eval/get_alpaca_answer_fast.py \
     --model_name "$MODEL_NAME" \
     --model_path "$MODEL_PATH" \
-    --conv_temp "gemma" \
+    --conv_temp "tulu" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
     --tensor_parallel_size 2
 
