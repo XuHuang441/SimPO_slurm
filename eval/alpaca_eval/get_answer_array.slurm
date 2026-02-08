@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=yejin
 #SBATCH -p yejin-lo
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --job-name=eval_array
 #SBATCH --output=logs/output_eval_%A_%a.log
 #SBATCH --mem=128G
@@ -33,6 +33,6 @@ echo "model path: $MODEL_PATH"
     --model_path "$MODEL_PATH" \
     --conv_temp "gemma" \
     --cache_dir "/hai/scratch/fangwu97/xu/cache" \
-    --tensor_parallel_size 2
+    --tensor_parallel_size 1
 
 huggingface-cli upload XuHuang/inpo_iter1 "$OUTPUT_JSON"
