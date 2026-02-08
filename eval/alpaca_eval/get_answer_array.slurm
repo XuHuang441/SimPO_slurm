@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=yejin
-#SBATCH -p yejin
+#SBATCH -p yejin-lo
 #SBATCH --gres=gpu:2
 #SBATCH --job-name=eval_array
 #SBATCH --output=logs/output_eval_%A_%a.log
@@ -18,7 +18,7 @@
 set -e
 
 MODEL_NAMES=(
-  "gemma-2-9b-it_mnpo_stage_4_armo_dpo_beta5_het0.001_weights0.1-0.1-0.8"
+  "gemma-2-2b-it"
 )
 
 MODEL_NAME=${MODEL_NAMES[$SLURM_ARRAY_TASK_ID]}
